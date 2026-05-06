@@ -1,4 +1,10 @@
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
+
+const client = createClient({
+  url: process.env.REDIS_URL
+});
+
+client.on('error', err => console.log('Redis Client Error', err));
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,15 +17,19 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing trip data' });
   }
 
-  // Generate unique ID (6 characters)
   const tripId = Math.random().toString(36).substring(2, 8);
 
   try {
-    // Store trip in KV with 90-day expiration (7776000 seconds)
-    await kv.set(`trip:${tripId}`, JSON.stringify(tripData), { ex: 7776000 });
+    await client.connect();
+    await client.set(`trip:${tripId}`, JSON.stringify(tripData), {
+      EX: 7776000 // 90 days
+    });
+    await client.disconnect();
+    
     res.status(200).json({ tripId });
   } catch (error) {
     console.error('Save failed:', error);
+    await client.disconnect();
     res.status(500).json({ error: 'Save failed' });
   }
 }

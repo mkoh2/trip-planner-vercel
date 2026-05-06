@@ -1,4 +1,10 @@
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
+
+const client = createClient({
+  url: process.env.REDIS_URL
+});
+
+client.on('error', err => console.log('Redis Client Error', err));
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -12,7 +18,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const tripDataString = await kv.get(`trip:${id}`);
+    await client.connect();
+    const tripDataString = await client.get(`trip:${id}`);
+    await client.disconnect();
     
     if (!tripDataString) {
       return res.status(404).json({ error: 'Trip not found' });
@@ -22,6 +30,7 @@ export default async function handler(req, res) {
     res.status(200).json({ tripData });
   } catch (error) {
     console.error('Load failed:', error);
+    await client.disconnect();
     res.status(500).json({ error: 'Load failed' });
   }
 }
