@@ -934,21 +934,21 @@
         letter-spacing: 0.5px; text-transform: uppercase; 
         color: #9B9B96; cursor: pointer; transition: opacity 0.3s ease;" id="about-link">About</span>
     </header>
+
     <div id="trip-management"
-        style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
+        style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
         <div>
             <input type="text" id="trip-name" placeholder="Name your trip..." style="width: 280px; border: none; border-bottom: 2px solid #1A1A1A; 
-    border-radius: 0; padding: 8px 0; font-size: 16px; background: transparent;
-    color: #1A1A1A; font-family: 'Cormorant Garamond', serif; font-weight: 400;">
+        border-radius: 0; padding: 8px 0; font-size: 16px; background: transparent;
+        color: #1A1A1A; font-family: 'Cormorant Garamond', serif; font-weight: 400;">
         </div>
         <div style="display: flex; gap: 8px;">
-            <button id="load-trip-btn"
+            <button id="load-trip-btn" onclick="toggleSavedTrips()"
                 style="padding: 6px 12px; font-size: 11px; border-color: #D4D4D0; color: #9B9B96;">Load</button>
             <button id="new-trip-btn"
                 style="padding: 6px 12px; font-size: 11px; border-color: #D4D4D0; color: #9B9B96;">New</button>
         </div>
-
-        <div id="saved-trips-list" style="margin-top: 24px;"></div>
+        <div id="saved-trips-list" style="width: 100%; display: none;"></div>
     </div>
 
     <div class="section" id="hotel-section" style="border-left: 4px solid #1A1A1A;">
@@ -1163,7 +1163,6 @@
             });
 
             document.getElementById('add-venue-btn').addEventListener('click', addVenueToList);
-            document.getElementById('load-trip-btn').addEventListener('click', () => { displaySavedTrips(); });
             document.getElementById('new-trip-btn').addEventListener('click', newTrip);
             document.getElementById('generate-days-btn').addEventListener('click', generateDays);
             document.getElementById('trip-name').value = '';
@@ -1182,6 +1181,17 @@
 
             displaySavedTrips();
             loadFromURL();
+        }
+
+        function toggleSavedTrips() {
+            const list = document.getElementById('saved-trips-list');
+            const isVisible = list.style.display !== 'none';
+            if (isVisible) {
+                list.style.display = 'none';
+            } else {
+                displaySavedTrips();
+                list.style.display = 'block';
+            }
         }
 
         async function loadFromURL() {
@@ -2066,6 +2076,8 @@
             } else {
                 displayVenueList();
             }
+
+            document.getElementById('saved-trips-list').style.display = 'none';
         }
 
         function newTrip() {
@@ -2127,7 +2139,7 @@
                 return;
             }
 
-            let html = '<div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #F0F0ED;"><div style="font-size: 10px; font-weight: 400; letter-spacing: 0.5px; text-transform: uppercase; color: #6B6B66; margin-bottom: 12px;">Saved Trips</div>';
+            let html = '<div><div style="font-size: 10px; font-weight: 400; letter-spacing: 0.5px; text-transform: uppercase; color: #6B6B66; margin-bottom: 12px;">Saved Trips</div>';
             tripNames.forEach(name => {
                 const trip = savedTrips[name];
                 const date = new Date(trip.savedAt).toLocaleDateString();
