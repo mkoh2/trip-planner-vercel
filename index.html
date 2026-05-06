@@ -1069,6 +1069,12 @@
             document.getElementById('pdf-btn').addEventListener('click', saveTripAsPDF);
             document.getElementById('generate-days-btn').addEventListener('click', generateDays);
 
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('[id^="menu-"]') && !e.target.closest('button[onclick^="toggleVenueMenu"]')) {
+                    document.querySelectorAll('[id^="menu-"]').forEach(m => m.style.display = 'none');
+                }
+            });
+
             // Sync button label with actual form state on load
             const form = document.getElementById('venue-form');
             const btn = document.getElementById('venue-toggle-btn');
