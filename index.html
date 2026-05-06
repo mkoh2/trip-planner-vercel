@@ -325,10 +325,11 @@
             position: fixed;
             top: 0;
             left: 0;
+            width: 100%;
             height: 40px;
             background: #F5F5F3;
             border-bottom: 1px solid #E8E8E5;
-            z-index: 150;
+            z-index: 500;
         }
 
         #header-wordmark {
@@ -901,8 +902,9 @@
     <div id="trip-management"
         style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <input type="text" id="trip-name" placeholder="Name your trip..." style="width: 280px; border: none; border-bottom: 1px solid #D4D4D0; 
-            border-radius: 0; padding: 8px 0; font-size: 14px; background: transparent;">
+            <input type="text" id="trip-name" placeholder="Name your trip..." style="width: 280px; border: none; border-bottom: 2px solid #1A1A1A; 
+    border-radius: 0; padding: 8px 0; font-size: 16px; background: transparent;
+    color: #1A1A1A; font-family: 'Cormorant Garamond', serif; font-weight: 400;">
         </div>
         <div style="display: flex; gap: 8px;">
             <button id="load-trip-btn"
@@ -2645,6 +2647,7 @@ ${travelInfo}
             }
 
             window.addEventListener('scroll', function () {
+                console.log('scrollY:', window.scrollY);
                 const header = document.getElementById('site-header');
                 if (window.scrollY > 80) {
                     header.classList.add('shrunk');
