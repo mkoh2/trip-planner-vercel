@@ -850,26 +850,29 @@
     <h1>Trip Planner</h1>
     <p style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase; 
    color: #9B9B96; margin-top: -40px; margin-bottom: 40px;">by mkoh2</p>
-    <div class="section" id="trip-management">
-        <div class="input-group">
-            <label>Trip Name</label>
-            <input type="text" id="trip-name" placeholder="Mexico City, May 2026"
-                style="width: 100%; max-width: 400px;">
+    <div id="trip-management"
+        style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <input type="text" id="trip-name" placeholder="Name your trip..." style="width: 280px; border: none; border-bottom: 1px solid #D4D4D0; 
+            border-radius: 0; padding: 8px 0; font-size: 14px; background: transparent;">
         </div>
-
-        <div style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
-            <button id="save-trip-btn" class="btn-primary">Save Trip</button>
-            <button id="load-trip-btn">Load Trip</button>
-            <button id="new-trip-btn">New Trip</button>
+        <div style="display: flex; gap: 8px;">
+            <button id="load-trip-btn"
+                style="padding: 6px 12px; font-size: 11px; border-color: #D4D4D0; color: #9B9B96;">Load</button>
+            <button id="new-trip-btn"
+                style="padding: 6px 12px; font-size: 11px; border-color: #D4D4D0; color: #9B9B96;">New</button>
         </div>
-
-        <div id="saved-trips-list" style="margin-top: 24px;"></div>
+        <div id="saved-trips-list"></div>
     </div>
 
-    <div class="section" id="hotel-section">
-        <h2>Hotel</h2>
-        <p style="color: #6B6B66; font-size: 13px; margin-bottom: 16px;">Select your hotel first - all venues and
-            distances will be relative to this location.</p>
+    <div id="saved-trips-list" style="margin-top: 24px;"></div>
+    </div>
+
+    <div class="section" id="hotel-section" style="border-left: 4px solid #1A1A1A;">
+        <h2 style="margin-bottom: 4px;">Where are you staying?</h2>
+        <p style="color: #9B9B96; font-size: 12px; letter-spacing: 0.3px; margin-bottom: 20px;">
+            Everything — distances, travel times, and your map — will anchor to this location.
+        </p>
         <input type="text" id="hotel-search" placeholder="Search for your hotel..."
             style="width: 100%; max-width: 500px;">
         <div id="hotel-display" style="margin-top: 16px; color: #6B6B66; font-size: 14px;"></div>
@@ -1073,6 +1076,7 @@
             }
 
             displaySavedTrips();
+            loadFromURL();
         }
 
         async function loadFromURL() {
@@ -1108,13 +1112,10 @@
             }
         }
 
-        loadFromURL();
-
         function initializeMap() {
-            const defaultCenter = { lat: 40.7128, lng: -74.0060 };
             map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 13,
-                center: defaultCenter,
+                zoom: 2,
+                center: { lat: 20, lng: 0 },
                 mapTypeControl: true,
                 streetViewControl: false,
                 styles: [
