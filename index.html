@@ -1951,6 +1951,12 @@
 
                 venueMarkers.forEach(marker => marker.setMap(null));
                 venueMarkers = [];
+
+                // Reset map
+                if (map) {
+                    map.setCenter({ lat: 20, lng: 0 });
+                    map.setZoom(2);
+                }
             }
         }
 
