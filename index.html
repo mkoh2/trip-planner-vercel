@@ -1455,6 +1455,7 @@
                             })
                         });
                         const data = await response.json();
+                        console.log('Places response:', data);
                         if (data.places) allPlaces.push(...data.places);
                     }
 
