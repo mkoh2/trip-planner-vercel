@@ -2022,10 +2022,11 @@
             };
 
             try {
+                const existingId = new URLSearchParams(window.location.search).get('trip');
                 const response = await fetch('/api/save-trip', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tripData })
+                    body: JSON.stringify({ tripData, tripId: existingId || undefined })
                 });
 
                 const result = await response.json();
