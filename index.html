@@ -1187,17 +1187,6 @@
                 return;
             }
 
-            function toggleVenueMenu(menuId) {
-                const menu = document.getElementById(menuId);
-                const isOpen = menu.style.display !== 'none';
-
-                // Close all open menus first
-                document.querySelectorAll('[id^="menu-"]').forEach(m => m.style.display = 'none');
-
-                // Toggle this one
-                menu.style.display = isOpen ? 'none' : 'block';
-            }
-
             const btn = document.getElementById('copy-btn');
             const urlParams = new URLSearchParams(window.location.search);
 
@@ -1216,7 +1205,12 @@
                 alert(`Share this URL:\n${url}`);
             });
         }
-
+        function toggleVenueMenu(menuId) {
+            const menu = document.getElementById(menuId);
+            const isOpen = menu.style.display !== 'none';
+            document.querySelectorAll('[id^="menu-"]').forEach(m => m.style.display = 'none');
+            menu.style.display = isOpen ? 'none' : 'block';
+        }
         function getCategoryColor(category) {
             const colors = {
                 'Restaurants/Quick Bites': '#8B7355',
