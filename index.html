@@ -1356,11 +1356,18 @@
             const walkingInfo = venue.walking ? `Walk: ${venue.walking.duration}` : '';
             const drivingInfo = venue.driving ? `Drive: ${venue.driving.duration}` : '';
             const timeInfo = venue.time ? `<strong>${formatTime(venue.time)}</strong><br>` : '';
+            const dayInfo = day ? `<div style="font-size: 11px; color: #9B9B96; margin-bottom: 4px;">Day ${day.dayNumber} — ${day.displayDate}</div>` : '';
 
             const infoWindow = new google.maps.InfoWindow({
-                content: `<div style="font-family: Inter, sans-serif; padding: 4px;">${timeInfo}<strong style="font-weight: 500;">${venue.name}</strong><br><span style="font-size: 12px; color: #6B6B66;">${venue.address}<br>${walkingInfo} ${drivingInfo}</span></div>`
+                content: `<div style="font-family: Inter, sans-serif; padding: 4px;">
+        ${dayInfo}
+        ${timeInfo}
+        <strong style="font-weight: 500;">${venue.name}</strong><br>
+        <span style="font-size: 12px; color: #6B6B66;">
+            ${venue.address}<br>${walkingInfo} ${drivingInfo}
+        </span>
+    </div>`
             });
-
             marker.addListener('click', function () {
                 infoWindow.open(map, marker);
             });
