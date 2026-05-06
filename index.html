@@ -2364,7 +2364,7 @@ ${travelInfo}
             <div class="venue-details">
                 ${v.address}<br>
                 ${v.rating ? `${v.rating}` : ''} ${v.priceLevel ? '•'.repeat(v.priceLevel) : ''}<br>
-                ${v.driving ? `<strong>From hotel:</strong> Drive ${v.driving.duration}` : ''}
+                ${(v.driving || v.walking) ? `<strong>From hotel:</strong> ${v.driving ? `Drive ${v.driving.duration}` : ''} ${v.walking ? `· Walk ${v.walking.duration}` : ''}` : ''}
             </div>
         </div>
 <div style="position: relative;">
