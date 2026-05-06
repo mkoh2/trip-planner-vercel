@@ -1027,76 +1027,8 @@
                             <option value="Shopping/Vintage">Vintage</option>
                         </optgroup>
                     </select>
-
-                    <div id="surprise-panel"
-                        style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #F0F0ED;">
-                        <button onclick="toggleSurprisePanel()" id="surprise-btn"
-                            style="padding: 8px 16px; font-size: 11px; border-color: #D4D4D0; color: #9B9B96;">
-                            ✨ Surprise Me
-                        </button>
-
-                        <div id="surprise-options" style="display: none; margin-top: 16px;">
-                            <div class="input-row">
-                                <div>
-                                    <label>Days to fill</label>
-                                    <select id="surprise-days">
-                                        <option value="all">All days</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label>Radius</label>
-                                    <select id="surprise-radius">
-                                        <option value="500">500m (0.3mi)</option>
-                                        <option value="1000" selected>1km (0.6mi)</option>
-                                        <option value="1600">1.6km (1mi)</option>
-                                        <option value="3200">3.2km (2mi)</option>
-                                        <option value="5000">5km (3.1mi)</option>
-                                        <option value="8000">8km (5mi)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label>Min Rating</label>
-                                    <select id="surprise-rating">
-                                        <option value="0">Any</option>
-                                        <option value="3">3.0+</option>
-                                        <option value="3.5" selected>3.5+</option>
-                                        <option value="4">4.0+</option>
-                                        <option value="4.5">4.5+</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label>Max Price</label>
-                                    <select id="surprise-price">
-                                        <option value="">Any</option>
-                                        <option value="1">$</option>
-                                        <option value="2">$$</option>
-                                        <option value="3">$$$</option>
-                                        <option value="4">$$$$</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div style="margin-top: 12px;">
-                                <label style="display: block; margin-bottom: 8px;">Categories to include</label>
-                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                    <label style="text-transform: none; font-size: 13px;"><input type="checkbox"
-                                            value="restaurant" checked> Restaurants</label>
-                                    <label style="text-transform: none; font-size: 13px;"><input type="checkbox"
-                                            value="bar" checked> Bars</label>
-                                    <label style="text-transform: none; font-size: 13px;"><input type="checkbox"
-                                            value="museum"> Museums</label>
-                                    <label style="text-transform: none; font-size: 13px;"><input type="checkbox"
-                                            value="park"> Parks</label>
-                                    <label style="text-transform: none; font-size: 13px;"><input type="checkbox"
-                                            value="shopping_mall"> Shopping</label>
-                                </div>
-                            </div>
-                            <button onclick="runSurpriseMe()" class="btn-primary" style="margin-top: 16px;"
-                                id="surprise-generate-btn">
-                                Generate Itinerary
-                            </button>
-                        </div>
-                    </div>
                 </div>
+
                 <div>
                     <label>Day</label>
                     <select id="day-select">
@@ -1432,7 +1364,7 @@
             const minRating = parseFloat(document.getElementById('surprise-rating').value);
             const maxPrice = document.getElementById('surprise-price').value;
             const selectedDay = document.getElementById('surprise-days').value;
-            const checkedCategories = [...document.querySelectorAll('#surprise-options input[type="checkbox"]:checked')]
+            const checkedCategories = [...document.querySelectorAll('#surprise-modal input[type="checkbox"]:checked')]
                 .map(cb => cb.value);
 
             if (checkedCategories.length === 0) {
@@ -1464,7 +1396,6 @@
                             })
                         });
                         const data = await response.json();
-                        console.log('Places response:', data);
                         if (data.places) allPlaces.push(...data.places);
                     }
 
@@ -1491,7 +1422,7 @@
 
                 displayDaysTimeline();
                 updateDayDropdown();
-                document.getElementById('surprise-options').style.display = 'none';
+                closeSurpriseModal();
 
             } catch (error) {
                 console.error('Surprise Me failed:', error);
