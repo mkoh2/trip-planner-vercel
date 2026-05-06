@@ -2508,13 +2508,14 @@ ${travelInfo}
         function toggleVenueForm() {
             const form = document.getElementById('venue-form');
             const btn = document.getElementById('venue-toggle-btn');
+            const isVisible = getComputedStyle(form).display !== 'none';
 
-            if (form.style.display === 'none') {
-                form.style.display = 'block';
-                btn.textContent = 'Hide ▲';
-            } else {
+            if (isVisible) {
                 form.style.display = 'none';
                 btn.textContent = 'Show ▼';
+            } else {
+                form.style.display = 'block';
+                btn.textContent = 'Hide ▲';
             }
         }
     </script>
