@@ -1656,25 +1656,16 @@
             const category = categorySelect.value;
             const selectedDay = daySelect.value;
 
-            if (!selectedVenue) {
-                alert('Please search for and select a venue first');
-                return;
-            }
-
-            if (!category) {
-                alert('Please select a category');
-                return;
-            }
-
-            if (tripDays.length > 0 && !selectedDay) {
-                alert('Please select which day to add this venue to');
-                return;
-            }
+            if (!selectedVenue) { alert('Please search for and select a venue first'); return; }
+            if (!category) { alert('Please select a category'); return; }
+            if (tripDays.length > 0 && !selectedDay) { alert('Please select which day to add this venue to'); return; }
 
             const btn = document.getElementById('add-venue-btn');
             const originalText = btn.textContent;
             btn.textContent = 'Calculating...';
             btn.disabled = true;
+
+            const selectedTime = document.getElementById('venue-time').value;
 
             try {
                 const distances = await calculateDistances(selectedVenue);
@@ -1682,9 +1673,9 @@
 
                 const venueWithData = {
                     ...selectedVenue,
-                    category: category,
-                    time: document.getElementById('venue-time').value || null,
-                    duration: duration,
+                    category,
+                    time: selectedTime || null,
+                    duration,
                     legTravelMode: 'driving',
                     walking: distances ? distances.walking : null,
                     driving: distances ? distances.driving : null
@@ -1693,14 +1684,18 @@
                 if (tripDays.length > 0) {
                     const day = tripDays.find(d => d.dayNumber === parseInt(selectedDay));
                     if (day) {
+                        if (selectedTime) {
+                            const conflict = day.venues.find(v => v.time === selectedTime);
+                            if (conflict) {
+                                alert(`${conflict.name} is already scheduled at ${formatTime(selectedTime)}. Please choose a different time.`);
+                                return;
+                            }
+                        }
                         day.venues.push(venueWithData);
-
                     }
                 } else {
-                    const rank = venues[category].length + 1;
-                    venueWithData.rank = rank;
+                    venueWithData.rank = venues[category].length + 1;
                     venues[category].push(venueWithData);
-
                 }
 
                 document.getElementById('venue-search').value = '';
@@ -1709,11 +1704,7 @@
                 document.getElementById('venue-time').value = '';
                 selectedVenue = null;
 
-                if (tripDays.length > 0) {
-                    displayDaysTimeline();
-                } else {
-                    displayVenueList();
-                }
+                if (tripDays.length > 0) { displayDaysTimeline(); } else { displayVenueList(); }
 
             } catch (error) {
                 console.error('Error calculating distances:', error);
@@ -1721,19 +1712,29 @@
 
                 const venueWithData = {
                     ...selectedVenue,
-                    category: category,
+                    category,
+                    time: selectedTime || null,
                     duration: getDefaultDuration(category),
+                    legTravelMode: 'driving',
                     walking: null,
                     driving: null
                 };
 
                 if (tripDays.length > 0) {
                     const day = tripDays.find(d => d.dayNumber === parseInt(selectedDay));
-                    if (day) day.venues.push(venueWithData);
-                    displayDaysTimeline();
+                    if (day) {
+                        if (selectedTime) {
+                            const conflict = day.venues.find(v => v.time === selectedTime);
+                            if (conflict) {
+                                alert(`${conflict.name} is already scheduled at ${formatTime(selectedTime)}. Please choose a different time.`);
+                                return;
+                            }
+                        }
+                        day.venues.push(venueWithData);
+                        displayDaysTimeline();
+                    }
                 } else {
-                    const rank = venues[category].length + 1;
-                    venueWithData.rank = rank;
+                    venueWithData.rank = venues[category].length + 1;
                     venues[category].push(venueWithData);
                     displayVenueList();
                 }
