@@ -1150,7 +1150,7 @@
             document.getElementById('print-btn').addEventListener('click', printTrip);
             document.getElementById('pdf-btn').addEventListener('click', saveTripAsPDF);
             document.getElementById('generate-days-btn').addEventListener('click', generateDays);
-
+            document.getElementById('trip-name').value = '';
             document.addEventListener('click', function (e) {
                 if (!e.target.closest('[id^="menu-"]') && !e.target.closest('button[onclick^="toggleVenueMenu"]')) {
                     document.querySelectorAll('[id^="menu-"]').forEach(m => m.style.display = 'none');
