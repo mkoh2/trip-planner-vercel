@@ -1243,18 +1243,11 @@
                 }
             });
 
-            const dayInfo = day ? `<div style="font-size: 11px; color: #9B9B96; margin-bottom: 4px;">Day ${day.dayNumber} — ${day.displayDate}</div>` : '';
-
             const infoWindow = new google.maps.InfoWindow({
                 content: `<div style="font-family: Inter, sans-serif; padding: 4px;">
-        ${dayInfo}
-        ${timeInfo}
-        <strong style="font-weight: 500;">${venue.name}</strong>
-        <br>
-        <span style="font-size: 12px; color: #6B6B66;">
-            ${venue.address}<br>${walkingInfo} ${drivingInfo}
-        </span>
-    </div>`
+            <strong style="font-weight: 500;">${hotelData.name}</strong><br>
+            <span style="font-size: 13px; color: #6B6B66;">${hotelData.address}</span>
+        </div>`
             });
 
             hotelMarker.addListener('click', function () {
