@@ -1075,11 +1075,6 @@
     <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #F0F0ED; 
     display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
         <button id="copy-btn" class="btn-primary" onclick="copyURL()">Copy URL</button>
-        <button id="pdf-btn" class="btn-primary">Save as PDF</button>
-        <label style="display: flex; align-items: center; gap: 8px; text-transform: none; font-size: 13px;">
-            <input type="checkbox" id="print-map-toggle" checked> Include map
-        </label>
-        <button id="print-btn">Print</button>
     </div>
     </div>
 
@@ -1158,8 +1153,6 @@
             document.getElementById('add-venue-btn').addEventListener('click', addVenueToList);
             document.getElementById('load-trip-btn').addEventListener('click', () => { displaySavedTrips(); });
             document.getElementById('new-trip-btn').addEventListener('click', newTrip);
-            document.getElementById('print-btn').addEventListener('click', printTrip);
-            document.getElementById('pdf-btn').addEventListener('click', saveTripAsPDF);
             document.getElementById('generate-days-btn').addEventListener('click', generateDays);
             document.getElementById('trip-name').value = '';
             document.addEventListener('click', function (e) {
@@ -2107,49 +2100,7 @@
                 displaySavedTrips();
             }
         }
-
-        function printTrip() {
-            const mapSection = document.querySelector('.section:has(#map)');
-            const printMapToggle = document.getElementById('print-map-toggle');
-
-            if (!printMapToggle.checked) {
-                mapSection.style.display = 'none';
-            } else {
-                mapSection.style.display = 'block';
-            }
-
-            window.print();
-            mapSection.style.display = 'block';
-        }
-
-        function saveTripAsPDF() {
-            const tripName = document.getElementById('trip-name').value || 'My Trip';
-
-            if (!hotelData || tripDays.length === 0) {
-                alert('Please select a hotel and generate trip days first');
-                return;
-            }
-
-            const proceed = confirm(
-                `PDF Export Instructions:\n\n` +
-                `1. Click OK\n` +
-                `2. In the print dialog, select "Save as PDF" as the destination\n` +
-                `3. Click Save\n\n` +
-                `Ready to continue?`
-            );
-
-            if (proceed) {
-                const originalTitle = document.title;
-                document.title = tripName.replace(/[^a-z0-9]/gi, '_');
-
-                printTrip();
-
-                setTimeout(() => {
-                    document.title = originalTitle;
-                }, 1000);
-            }
-        }
-
+        
         function generateDays() {
             const startDate = document.getElementById('trip-start-date').value;
             const endDate = document.getElementById('trip-end-date').value;
