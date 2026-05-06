@@ -362,8 +362,8 @@
             }
 
             #header-wordmark {
-                font-size: 22px;
-                letter-spacing: 8px;
+                font-size: 16px;
+                letter-spacing: 5px;
             }
         }
 
@@ -634,6 +634,11 @@
                 padding: 12px 14px;
             }
 
+            input[type="time"] {
+                width: auto !important;
+                min-width: 140px;
+            }
+
             /* Buttons - full width on mobile */
             button {
                 width: 100%;
@@ -768,6 +773,12 @@
 
             div[style*="display: flex; gap: 12px"] {
                 flex-wrap: wrap;
+            }
+
+            #load-trip-btn,
+            #new-trip-btn {
+                width: auto !important;
+                padding: 6px 12px !important;
             }
 
             /* Sticky venue section - less prominent on mobile */
