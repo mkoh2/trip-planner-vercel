@@ -16,6 +16,9 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <title>Locationary</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap"
@@ -961,13 +964,10 @@
     <div class="section" id="trip-dates-section">
         <h2>Trip Dates</h2>
         <div class="input-row">
-            <div>
-                <label>Start Date</label>
-                <input type="date" id="trip-start-date">
-            </div>
-            <div>
-                <label>End Date</label>
-                <input type="date" id="trip-end-date">
+            <div style="flex: 1;">
+                <label>Select Dates</label>
+                <input type="text" id="trip-date-range" placeholder="Select your travel dates..."
+                    style="width: 100%; max-width: 400px;" readonly>
             </div>
             <div style="display: flex; align-items: flex-end;">
                 <button id="generate-days-btn" class="btn-primary">Generate Days</button>
@@ -1149,6 +1149,18 @@
             initHotelSearch();
             initVenueSearch();
             setupFilterButtons();
+
+            flatpickr('#trip-date-range', {
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                onChange: function (selectedDates) {
+                    if (selectedDates.length === 2) {
+                        tripStartDate = selectedDates[0].toISOString().split('T')[0];
+                        tripEndDate = selectedDates[1].toISOString().split('T')[0];
+                    }
+                }
+            });
 
             document.getElementById('add-venue-btn').addEventListener('click', addVenueToList);
             document.getElementById('load-trip-btn').addEventListener('click', () => { displaySavedTrips(); });
@@ -2050,6 +2062,9 @@
                 document.getElementById('hotel-display').innerHTML = '';
                 document.getElementById('hotel-search').value = '';
                 document.getElementById('list-display').innerHTML = '';
+                document.getElementById('trip-date-range').value = '';
+                tripStartDate = null;
+                tripEndDate = null;
 
                 if (hotelMarker) {
                     hotelMarker.setMap(null);
@@ -2100,24 +2115,14 @@
                 displaySavedTrips();
             }
         }
-        
+
         function generateDays() {
-            const startDate = document.getElementById('trip-start-date').value;
-            const endDate = document.getElementById('trip-end-date').value;
-
-            if (!startDate || !endDate) {
-                alert('Please select both start and end dates');
+            if (!tripStartDate || !tripEndDate) {
+                alert('Please select your travel dates first');
                 return;
             }
 
-            if (new Date(startDate) > new Date(endDate)) {
-                alert('End date must be after start date');
-                return;
-            }
-
-            tripStartDate = startDate;
-            tripEndDate = endDate;
-            generateDaysFromDates(startDate, endDate);
+            generateDaysFromDates(tripStartDate, tripEndDate);
             displayDaysTimeline();
             updateDayDropdown();
         }
