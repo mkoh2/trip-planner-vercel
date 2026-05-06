@@ -309,6 +309,54 @@
             flex-wrap: wrap;
         }
 
+        #site-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100px;
+            background: transparent;
+            transition: height 0.3s ease, background 0.3s ease, border 0.3s ease;
+            position: relative;
+            z-index: 99;
+        }
+
+        #site-header.shrunk {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 40px;
+            background: #F5F5F3;
+            border-bottom: 1px solid #E8E8E5;
+            z-index: 150;
+        }
+
+        #header-wordmark {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 32px;
+            letter-spacing: 12px;
+            color: #1A1A1A;
+            text-transform: uppercase;
+            transition: font-size 0.3s ease, letter-spacing 0.3s ease;
+        }
+
+        #site-header.shrunk #header-wordmark {
+            font-size: 15px;
+            letter-spacing: 3px;
+        }
+
+        @media (max-width: 768px) {
+            #site-header {
+                height: 70px;
+            }
+
+            #header-wordmark {
+                font-size: 22px;
+                letter-spacing: 8px;
+            }
+        }
+
         @media print {
             body {
                 background: white;
@@ -847,9 +895,9 @@
 </head>
 
 <body>
-    <h1>Trip Planner</h1>
-    <p style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase; 
-   color: #9B9B96; margin-top: -40px; margin-bottom: 40px;">by mkoh2</p>
+    <header id="site-header">
+        <span id="header-wordmark">L O C A T I O N A R Y</span>
+    </header>
     <div id="trip-management"
         style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
         <div>
@@ -999,7 +1047,7 @@
     </div>
 
     <div class="section"
-        style="position: sticky; bottom: 0; background: #FFFFFF; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); padding: 12px 40px; margin-bottom: 0;">
+        style="position: sticky; bottom: 0; background: #FFFFFF; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); padding: 12px 40px; margin-bottom: 0; z-index: 200;">
         <div style="display: flex; gap: 8px; justify-content: center;">
             <button onclick="saveTrip()" class="btn-primary" style="padding: 8px 16px; font-size: 11px;">Save
                 Trip</button>
@@ -2595,6 +2643,17 @@ ${travelInfo}
                 form.style.display = 'block';
                 btn.textContent = 'Hide ▲';
             }
+
+            window.addEventListener('scroll', function () {
+                const header = document.getElementById('site-header');
+                if (window.scrollY > 80) {
+                    header.classList.add('shrunk');
+                    document.body.style.paddingTop = '40px';
+                } else {
+                    header.classList.remove('shrunk');
+                    document.body.style.paddingTop = '0';
+                }
+            });
         }
     </script>
 
