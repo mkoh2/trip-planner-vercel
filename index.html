@@ -503,6 +503,332 @@
                 width: 100%;
             }
         }
+
+        /* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px 12px;
+                font-size: 14px;
+            }
+
+            h1 {
+                font-size: 28px;
+                margin-bottom: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+                margin-bottom: 16px;
+            }
+
+            h3 {
+                font-size: 18px;
+            }
+
+            /* Sections - reduce padding */
+            .section {
+                padding: 20px 16px;
+                margin-bottom: 20px;
+            }
+
+            /* Day cards - more compact */
+            .day-card {
+                padding: 16px 12px;
+                margin-bottom: 16px;
+            }
+
+            /* Map - smaller on mobile */
+            #map {
+                height: 250px;
+                margin-bottom: 16px;
+            }
+
+            /* Form inputs - stack vertically */
+            .input-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .input-row>div {
+                width: 100% !important;
+            }
+
+            /* All text inputs full width */
+            input[type="text"],
+            input[type="date"],
+            input[type="time"],
+            select {
+                width: 100% !important;
+                max-width: 100% !important;
+                font-size: 16px;
+                /* Prevents iOS zoom */
+                padding: 12px 14px;
+            }
+
+            /* Buttons - full width on mobile */
+            button {
+                width: 100%;
+                padding: 14px 20px;
+                font-size: 13px;
+                margin: 4px 0;
+            }
+
+            /* Small action buttons - keep compact */
+            .btn-delete,
+            .btn-edit {
+                width: auto;
+                min-width: 80px;
+                padding: 10px 14px;
+                font-size: 11px;
+                margin: 2px;
+            }
+
+            /* Filter buttons - smaller */
+            .filter-btn {
+                font-size: 11px;
+                padding: 8px 12px;
+                margin: 3px;
+            }
+
+            /* Venue items - more compact */
+            .venue-item {
+                padding: 12px 0;
+            }
+
+            /* Venue item button groups - stack on mobile */
+            .venue-item>div {
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+
+            .venue-item>div>div:first-child {
+                width: 100%;
+            }
+
+            .venue-item>div>div:last-child {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                width: 100%;
+            }
+
+            /* Venue name and details - smaller */
+            .venue-name {
+                font-size: 15px;
+                margin-bottom: 6px;
+            }
+
+            .venue-details {
+                font-size: 12px;
+                line-height: 1.6;
+            }
+
+            /* Travel info - more compact */
+            .travel-info {
+                padding: 12px 14px;
+                margin: 12px 0;
+                font-size: 12px;
+            }
+
+            /* Badges - smaller */
+            .time-badge {
+                padding: 5px 10px;
+                font-size: 11px;
+                margin-bottom: 8px;
+            }
+
+            .status-open,
+            .status-closed {
+                padding: 4px 10px;
+                font-size: 10px;
+                margin-left: 6px;
+            }
+
+            .category-badge {
+                padding: 3px 8px;
+                font-size: 9px;
+                margin-left: 6px;
+            }
+
+            /* Conflict warnings - smaller */
+            .conflict-warning,
+            .conflict-error {
+                padding: 10px 12px;
+                margin-top: 10px;
+                font-size: 11px;
+            }
+
+            /* Timeline - optimize for mobile scrolling */
+            div[style*="overflow-x: auto"] {
+                padding: 8px 0 !important;
+                margin: 0 -12px;
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+
+            /* Timeline cards - smaller on mobile */
+            div[style*="flex-shrink: 0; width: 200px"] {
+                width: 140px !important;
+                min-width: 140px;
+            }
+
+            div[style*="flex-shrink: 0; width: 200px"]>div {
+                padding: 12px !important;
+                font-size: 11px !important;
+            }
+
+            div[style*="flex-shrink: 0; width: 200px"] div[style*="font-size: 14px"] {
+                font-size: 12px !important;
+            }
+
+            div[style*="flex-shrink: 0; width: 200px"] div[style*="font-size: 12px"] {
+                font-size: 10px !important;
+                line-height: 1.2;
+            }
+
+            /* Timeline container - reduce padding */
+            div[style*="padding: 32px"] {
+                padding: 16px 12px !important;
+            }
+
+            /* Header flex groups - wrap on mobile */
+            div[style*="display: flex; justify-content: space-between"] {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            div[style*="display: flex; gap: 12px"] {
+                flex-wrap: wrap;
+            }
+
+            /* Sticky venue section - less prominent on mobile */
+            #venue-section {
+                position: relative !important;
+                top: auto !important;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            /* Hide venue form by default on mobile */
+            #venue-form {
+                display: none;
+            }
+
+            /* Sticky bottom bar - full width */
+            .section[style*="position: sticky; bottom: 0"] {
+                left: 0;
+                right: 0;
+                margin-left: -12px;
+                margin-right: -12px;
+                width: calc(100% + 24px);
+                padding: 12px 16px !important;
+                border-radius: 0;
+            }
+
+            /* Print/copy button group - stack on mobile */
+            #list-display+.section>div:first-child {
+                flex-direction: column;
+                align-items: stretch !important;
+            }
+
+            #list-display+.section>div:first-child>div {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            /* Weather widget - smaller */
+            div[id^="weather-day-"] {
+                font-size: 12px !important;
+            }
+
+            div[id^="weather-day-"] img {
+                width: 28px !important;
+                height: 28px !important;
+            }
+
+            div[id^="weather-day-"]>div>div:first-child {
+                font-size: 13px !important;
+            }
+
+            div[id^="weather-day-"]>div>div:last-child {
+                font-size: 10px !important;
+            }
+
+            /* Saved trips list - more compact */
+            #saved-trips-list>div {
+                padding-top: 16px;
+                margin-top: 16px;
+            }
+
+            #saved-trips-list>div>div {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 8px;
+                padding: 8px 0;
+            }
+
+            #saved-trips-list>div>div>span {
+                font-size: 14px;
+            }
+
+            #saved-trips-list>div>div>div {
+                display: flex;
+                gap: 8px;
+                width: 100%;
+            }
+
+            #saved-trips-list>div>div>div>span {
+                font-size: 11px;
+                flex: 1;
+            }
+
+            /* Hotel display - more compact */
+            #hotel-display {
+                font-size: 13px;
+                line-height: 1.5;
+            }
+
+            /* Day collapse arrow - larger touch target */
+            div[onclick^="toggleDayCollapse"] {
+                padding: 8px 0;
+                min-height: 44px;
+                display: flex !important;
+                align-items: center;
+            }
+
+            /* Toggle button - better touch target */
+            #venue-toggle-btn {
+                min-height: 44px;
+                padding: 10px 16px !important;
+            }
+        }
+
+        /* Extra small phones */
+        @media (max-width: 375px) {
+            body {
+                padding: 12px 8px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .section {
+                padding: 16px 12px;
+            }
+
+            .day-card {
+                padding: 12px 10px;
+            }
+
+            /* Timeline cards - even smaller */
+            div[style*="flex-shrink: 0; width: 200px"] {
+                width: 120px !important;
+                min-width: 120px;
+            }
+        }
     </style>
 </head>
 
