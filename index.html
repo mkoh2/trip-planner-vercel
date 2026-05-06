@@ -1002,17 +1002,25 @@
                             <option value="Restaurants/Quick Bites">Quick Bites</option>
                             <option value="Restaurants/Casual Dining">Casual Dining</option>
                             <option value="Restaurants/High-End">High-End</option>
+                            <option value="Restaurants/Brunch">Brunch</option>
                             <option value="Restaurants/Cafe">Cafe</option>
                             <option value="Restaurants/Bakery">Bakery</option>
+                            <option value="Restaurants/Food Hall">Food Hall</option>
                         </optgroup>
                         <optgroup label="Bars">
                             <option value="Bars/Dive">Dive Bar</option>
                             <option value="Bars/Specialty Cocktails">Specialty Cocktails</option>
                             <option value="Bars/Wine">Wine Bar</option>
                             <option value="Bars/Brewery">Brewery</option>
+                            <option value="Bars/Rooftop">Rooftop Bar</option>
+                            <option value="Bars/Live Music">Live Music</option>
                         </optgroup>
                         <optgroup label="Attractions">
                             <option value="Attractions/Museums">Museums</option>
+                            <option value="Attractions/Art Gallery">Art Gallery</option>
+                            <option value="Attractions/Historic Site">Historic Site</option>
+                            <option value="Attractions/Theater">Theater</option>
+                            <option value="Attractions/Aquarium">Aquarium</option>
                             <option value="Attractions/Library">Library</option>
                             <option value="Attractions/Park">Park</option>
                             <option value="Attractions/Church">Church</option>
@@ -1025,6 +1033,13 @@
                             <option value="Shopping/Markets">Markets</option>
                             <option value="Shopping/Stores">Stores</option>
                             <option value="Shopping/Vintage">Vintage</option>
+                            <option value="Shopping/Bookstore">Bookstore</option>
+                        </optgroup>
+                        <optgroup label="Entertainment">
+                            <option value="Entertainment/Shows & Events">Shows & Events</option>
+                        </optgroup>
+                        <optgroup label="Wellness">
+                            <option value="Wellness/Spa">Spa</option>
                         </optgroup>
                     </select>
                 </div>
@@ -1099,23 +1114,34 @@
                 "Restaurants/Quick Bites": [],
                 "Restaurants/Casual Dining": [],
                 "Restaurants/High-End": [],
+                "Restaurants/Brunch": [],
                 "Restaurants/Cafe": [],
                 "Restaurants/Bakery": [],
+                "Restaurants/Food Hall": [],
                 "Bars/Dive": [],
                 "Bars/Specialty Cocktails": [],
                 "Bars/Wine": [],
                 "Bars/Brewery": [],
+                "Bars/Rooftop": [],
+                "Bars/Live Music": [],
                 "Attractions/Museums": [],
+                "Attractions/Historic Site": [],
+                "Attractions/Theater": [],
+                "Attractions/Aquarium": [],
                 "Attractions/Library": [],
                 "Attractions/Park": [],
-                "Shopping/Markets": [],
-                "Shopping/Stores": [],
-                "Shopping/Vintage": [],
                 "Attractions/Church": [],
                 "Attractions/Square": [],
                 "Attractions/Zoo": [],
                 "Attractions/Beach": [],
                 "Attractions/Viewpoint": [],
+                "Shopping/Markets": [],
+                "Shopping/Stores": [],
+                "Shopping/Vintage": [],
+                "Shopping/Bookstore": [],
+                "Attractions/Art Gallery": [],
+                "Entertainment/Shows & Events": [],
+                "Wellness/Spa": [],
             };
         }
         let venues = createEmptyVenues();
@@ -1333,17 +1359,28 @@
                 'Restaurants/Quick Bites': '#8B7355',
                 'Restaurants/Casual Dining': '#6B6B66',
                 'Restaurants/High-End': '#1A1A1A',
+                'Restaurants/Brunch': '#D4A574',
                 'Restaurants/Cafe': '#A0826D',
                 'Restaurants/Bakery': '#C9A882',
+                'Restaurants/Food Hall': '#B5895A',
                 'Bars/Dive': '#4A4A45',
                 'Bars/Specialty Cocktails': '#2A2A2A',
                 'Bars/Wine': '#6B5B95',
                 'Bars/Brewery': '#8B7355',
+                'Bars/Rooftop': '#4A7C9E',
+                'Bars/Live Music': '#7A5C8B',
                 'Attractions/Museums': '#556B8B',
+                'Attractions/Historic Site': '#7D6B55',
+                'Attractions/Theater': '#8B5B6B',
+                'Attractions/Aquarium': '#3D7A8A',
                 'Attractions/Library': '#6B8B7C',
                 'Attractions/Park': '#7C8B6B',
                 'Shopping/Markets': '#D4A574',
-                'Shopping/Stores': '#9B8B7E'
+                'Shopping/Stores': '#9B8B7E',
+                'Shopping/Bookstore': '#7C6B5B',
+                'Attractions/Art Gallery': '#8B6B8B',
+                'Entertainment/Shows & Events': '#C4722A',
+                'Wellness/Spa': '#7C9B8B'
             };
             return colors[category] || '#6B6B66';
         }
@@ -2154,18 +2191,29 @@
                 'Restaurants/Quick Bites': 30,
                 'Restaurants/Casual Dining': 90,
                 'Restaurants/High-End': 120,
+                'Restaurants/Brunch': 90,
                 'Restaurants/Cafe': 20,
                 'Restaurants/Bakery': 20,
+                'Restaurants/Food Hall': 60,
                 'Bars/Dive': 90,
                 'Bars/Specialty Cocktails': 90,
                 'Bars/Wine': 90,
                 'Bars/Brewery': 90,
+                'Bars/Rooftop': 90,
+                'Bars/Live Music': 120,
                 'Attractions/Museums': 120,
+                'Attractions/Historic Site': 60,
+                'Attractions/Theater': 150,
+                'Attractions/Aquarium': 90,
                 'Attractions/Library': 30,
                 'Attractions/Park': 60,
                 'Shopping/Markets': 60,
                 'Shopping/Stores': 30,
                 'Shopping/Vintage': 45,
+                'Shopping/Bookstore': 30,
+                'Attractions/Art Gallery': 60,
+                'Entertainment/Shows & Events': 120,
+                'Wellness/Spa': 120,
                 'Attractions/Church': 30,
                 'Attractions/Square': 15,
                 'Attractions/Zoo': 120,
@@ -2567,23 +2615,34 @@ ${travelInfo}
                 "Restaurants/Quick Bites",
                 "Restaurants/Casual Dining",
                 "Restaurants/High-End",
+                "Restaurants/Brunch",
                 "Restaurants/Cafe",
                 "Restaurants/Bakery",
+                "Restaurants/Food Hall",
                 "Bars/Dive",
                 "Bars/Specialty Cocktails",
                 "Bars/Wine",
                 "Bars/Brewery",
+                "Bars/Rooftop",
+                "Bars/Live Music",
                 "Attractions/Museums",
+                "Attractions/Historic Site",
+                "Attractions/Theater",
+                "Attractions/Aquarium",
                 "Attractions/Library",
                 "Attractions/Park",
-                "Shopping/Markets",
-                "Shopping/Stores",
-                "Shopping/Vintage",
                 "Attractions/Church",
                 "Attractions/Square",
                 "Attractions/Zoo",
                 "Attractions/Beach",
                 "Attractions/Viewpoint",
+                "Shopping/Markets",
+                "Shopping/Stores",
+                "Shopping/Vintage",
+                "Shopping/Bookstore",
+                "Attractions/Art Gallery",
+                "Entertainment/Shows & Events",
+                "Wellness/Spa",
             ];
 
             let options = "Choose new category:\n\n";
