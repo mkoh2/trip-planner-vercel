@@ -12,7 +12,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trip Planner</title>
+    <title>Locationary</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap"
         rel="stylesheet">
@@ -1045,8 +1045,6 @@
 
     <div id="list-display"></div>
 
-    <div id="list-display"></div>
-
     <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #F0F0ED; 
     display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
         <button id="copy-btn" class="btn-primary" onclick="copyURL()">Copy URL</button>
@@ -1121,12 +1119,10 @@
                 });
                 dayNum++;
             }
-            console.log('Generated days:', tripDays);
             return tripDays;
         }
 
         function initMap() {
-            console.log('Google Maps API loaded!');
             initializeMap();
             initHotelSearch();
             initVenueSearch();
@@ -1179,8 +1175,6 @@
                         } else {
                             displayVenueList();
                         }
-
-                        console.log('✅ Trip loaded from URL:', tripId);
                     }
                 } catch (error) {
                     console.error('Failed to load trip from URL:', error);
@@ -1213,7 +1207,6 @@
                     }
                 ]
             });
-            console.log('Map initialized');
         }
 
         function updateHotelMarker() {
@@ -1256,7 +1249,6 @@
 
             map.setCenter({ lat: hotelData.lat, lng: hotelData.lng });
             map.setZoom(14);
-            console.log('Hotel marker added:', hotelData.name);
         }
 
         async function copyURL() {
@@ -1334,8 +1326,6 @@
                     });
                 });
             }
-
-            console.log('Venue markers updated:', venueMarkers.length);
         }
 
         function createVenueMarker(venue, category, label, day = null) {
@@ -1384,8 +1374,6 @@
 
             autocomplete.addListener('place_changed', function () {
                 const place = autocomplete.getPlace();
-                console.log('Place selected:', place);
-
                 if (!place.geometry || !place.geometry.location) {
                     alert('No location data for this place');
                     return;
@@ -1398,8 +1386,6 @@
                     lng: place.geometry.location.lng(),
                     placeId: place.place_id
                 };
-
-                console.log('Hotel data stored:', hotelData);
                 displayHotel();
 
                 if (tripDays.length > 0) {
@@ -1422,7 +1408,6 @@
                 });
                 options.bounds = circle.getBounds();
                 options.strictBounds = false;
-                console.log('Venue search biased to 6 miles from hotel');
             }
 
             if (venueAutocomplete) {
@@ -1433,7 +1418,6 @@
 
             venueAutocomplete.addListener('place_changed', function () {
                 const place = venueAutocomplete.getPlace();
-                console.log('Venue selected:', place);
 
                 if (!place.geometry || !place.geometry.location) {
                     alert('No location data for this place');
@@ -1452,7 +1436,6 @@
                     openingHours: place.opening_hours || null
                 };
 
-                console.log('Selected venue stored:', selectedVenue);
                 suggestCategory(place.types);
             });
         }
@@ -1484,7 +1467,6 @@
                 categorySelect.value = 'Attractions/Park';
             }
 
-            console.log('Auto-suggested category:', categorySelect.value);
         }
 
         async function addVenueToList() {
@@ -1531,13 +1513,13 @@
                     const day = tripDays.find(d => d.dayNumber === parseInt(selectedDay));
                     if (day) {
                         day.venues.push(venueWithData);
-                        console.log('Added to day', selectedDay, venueWithData);
+
                     }
                 } else {
                     const rank = venues[category].length + 1;
                     venueWithData.rank = rank;
                     venues[category].push(venueWithData);
-                    console.log('Added to category', category, venueWithData);
+
                 }
 
                 document.getElementById('venue-search').value = '';
@@ -1638,7 +1620,7 @@
 
         async function calculateDistances(venue) {
             if (!hotelData) {
-                console.log('No hotel set - skipping distance calculation');
+
                 return Promise.resolve(null);
             }
 
@@ -1723,9 +1705,6 @@
                 });
                 const transitData = await transitResponse.json();
 
-                console.log('walking status:', walkingData.status);
-                console.log('driving status:', drivingData.status);
-                console.log('transit data:', transitData.status);
 
                 if (walkingData.status === 'OK' && drivingData.status === 'OK') {
                     const walkingResult = walkingData.rows[0].elements[0];
@@ -1810,7 +1789,7 @@
                 `;
                 });
 
-                console.log('Weather data loaded successfully');
+
 
             } catch (error) {
                 console.error('Weather fetch failed:', error);
@@ -1830,7 +1809,7 @@
                     filterButtons.forEach(btn => btn.classList.remove('active'));
                     this.classList.add('active');
                     currentFilter = this.dataset.filter;
-                    console.log('Filter changed to:', currentFilter);
+
                     displayVenueList();
                 });
             });
@@ -1842,7 +1821,7 @@
             updateHotelMarker();
             const hotelLocation = new google.maps.LatLng(hotelData.lat, hotelData.lng);
             initVenueSearch(hotelLocation);
-            console.log('Venue search now biased toward hotel location');
+
         }
 
         async function saveTrip(silent = false) {
@@ -2003,70 +1982,6 @@
             mapSection.style.display = 'block';
         }
 
-        function copyTripAsURL() {
-            const tripName = document.getElementById('trip-name').value || 'My Trip';
-
-            if (!hotelData || tripDays.length === 0) {
-                alert('Please select a hotel and generate trip days first');
-                return;
-            }
-
-            let text = `${tripName.toUpperCase()}\n`;
-            text += `${'='.repeat(tripName.length)}\n\n`;
-
-            text += `📍 HOTEL\n`;
-            text += `${hotelData.name}\n`;
-            text += `${hotelData.address}\n\n`;
-
-            if (tripDays.length > 0) {
-                text += `📅 ${tripDays[0].displayDate} - ${tripDays[tripDays.length - 1].displayDate}\n\n`;
-            }
-
-            text += `${'='.repeat(50)}\n\n`;
-
-            tripDays.forEach(day => {
-                text += `DAY ${day.dayNumber} — ${day.displayDate.toUpperCase()}\n`;
-                text += `${'-'.repeat(50)}\n\n`;
-
-                const sortedVenues = [...day.venues].sort((a, b) => {
-                    if (!a.time) return 1;
-                    if (!b.time) return -1;
-                    return a.time.localeCompare(b.time);
-                });
-
-                if (sortedVenues.length === 0) {
-                    text += `No venues scheduled\n\n`;
-                } else {
-                    sortedVenues.forEach((venue, idx) => {
-                        if (venue.time) {
-                            text += `⏰ ${formatTime(venue.time)}\n`;
-                        }
-                        text += `${venue.name}\n`;
-                        text += `${venue.address}\n`;
-
-                        if (venue.rating || venue.priceLevel) {
-                            text += `${venue.rating ? `⭐ ${venue.rating}` : ''} ${venue.priceLevel ? '💲'.repeat(venue.priceLevel) : ''}\n`;
-                        }
-
-                        if (venue.walking || venue.driving) {
-                            text += `🏨→ ${venue.walking ? `Walk ${venue.walking.duration}` : ''} ${venue.driving ? `Drive ${venue.driving.duration}` : ''}\n`;
-                        }
-
-                        text += `\n`;
-                    });
-                }
-
-                text += `\n`;
-            });
-
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Trip copied to clipboard! 📋\nPaste it anywhere.');
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                alert('Copy failed. Please try again.');
-            });
-        }
-
         function saveTripAsPDF() {
             const tripName = document.getElementById('trip-name').value || 'My Trip';
 
@@ -2213,7 +2128,7 @@
         function getOpenStatusBadge(venue, tripDate, timeString) {
             try {
                 if (!venue.openingHours || !venue.openingHours.weekday_text) {
-                    console.log(venue.name, '- No opening hours data available');
+
                     return '';
                 }
 
@@ -2222,9 +2137,6 @@
                 const dayOfWeek = date.getDay();
                 const hoursIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
                 const hoursText = venue.openingHours.weekday_text[hoursIndex];
-
-                console.log(venue.name, 'on', tripDate, '(day', dayOfWeek, ') -', hoursText);
-
                 const hoursCheck = isVenueOpenAtTime(venue, tripDate, timeString);
 
                 if (hoursCheck.isOpen === false) {
@@ -2294,7 +2206,6 @@
                         const prevVenue = sortedVenues[i - 1];
                         const currentVenue = sortedVenues[i];
                         const travel = await calculateVenueToVenueDistance(prevVenue, currentVenue);
-                        console.log('travelFromPrevious:', travel);
                         currentVenue.travelFromPrevious = travel;
                     }
 
@@ -2582,7 +2493,6 @@ ${travelInfo}
                 if (index >= 0 && index < categories.length) {
                     venue.category = categories[index];
                     displayDaysTimeline();
-                    console.log('Updated category for', venue.name, 'to', venue.category);
                 } else {
                     alert('Invalid choice');
                 }
@@ -2596,7 +2506,6 @@ ${travelInfo}
                     venue.rank = idx + 1;
                 });
                 displayVenueList();
-                console.log('Venue deleted from', category);
             }
         }
 
@@ -2606,7 +2515,6 @@ ${travelInfo}
                 if (day) {
                     day.venues.splice(venueIndex, 1);
                     displayDaysTimeline();
-                    console.log('Venue deleted from day', dayNumber);
                 }
             }
         }
@@ -2682,7 +2590,6 @@ ${travelInfo}
         });
 
         window.addEventListener('scroll', function () {
-            console.log('scrollY:', window.scrollY);
             const header = document.getElementById('site-header');
             if (window.scrollY > 80) {
                 header.classList.add('shrunk');
