@@ -2645,19 +2645,20 @@ ${travelInfo}
                 form.style.display = 'block';
                 btn.textContent = 'Hide ▲';
             }
-
-            window.addEventListener('scroll', function () {
-                console.log('scrollY:', window.scrollY);
-                const header = document.getElementById('site-header');
-                if (window.scrollY > 80) {
-                    header.classList.add('shrunk');
-                    document.body.style.paddingTop = '40px';
-                } else {
-                    header.classList.remove('shrunk');
-                    document.body.style.paddingTop = '0';
-                }
-            });
         }
+
+        window.addEventListener('scroll', function () {
+            console.log('scrollY:', window.scrollY);
+            const header = document.getElementById('site-header');
+            if (window.scrollY > 80) {
+                header.classList.add('shrunk');
+                document.body.style.paddingTop = '40px';
+            } else {
+                header.classList.remove('shrunk');
+                document.body.style.paddingTop = '0';
+            }
+        });
+        
     </script>
 
     <script
