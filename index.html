@@ -1593,11 +1593,12 @@
 
                 console.log('walking status:', walkingData.status);
                 console.log('driving status:', drivingData.status);
-                console.log('transit data:', transitData);
+                console.log('transit data:', transitData.status);
 
                 if (walkingData.status === 'OK' && drivingData.status === 'OK') {
                     const walkingResult = walkingData.rows[0].elements[0];
                     const drivingResult = drivingData.rows[0].elements[0];
+                    const transitResult = transitData.rows[0].elements[0];
 
                     return {
                         walking: walkingResult.status === 'OK' ? {
