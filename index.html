@@ -979,8 +979,14 @@
         style="position: sticky; top: 15px; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h2 style="margin: 0;">Add Venues</h2>
-            <button onclick="toggleVenueForm()" id="venue-toggle-btn" style="padding: 8px 16px; font-size: 11px;">Hide
-                ▲</button>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="openSurpriseModal()"
+                    style="padding: 8px 16px; font-size: 11px; border-color: #D4D4D0; color: #9B9B96;">
+                    ✨ Surprise Me
+                </button>
+                <button onclick="toggleVenueForm()" id="venue-toggle-btn"
+                    style="padding: 8px 16px; font-size: 11px;">Hide ▲</button>
+            </div>
         </div>
 
         <div id="venue-form">
@@ -1391,23 +1397,7 @@
             return colors[category] || '#6B6B66';
         }
 
-        function toggleSurprisePanel() {
-            const options = document.getElementById('surprise-options');
-            const isVisible = getComputedStyle(options).display !== 'none';
-            options.style.display = isVisible ? 'none' : 'block';
-
-            // Populate days dropdown
-            const surpriseDays = document.getElementById('surprise-days');
-            surpriseDays.innerHTML = '<option value="all">All days</option>';
-            tripDays.forEach(day => {
-                const option = document.createElement('option');
-                option.value = day.dayNumber;
-                option.textContent = `Day ${day.dayNumber} — ${day.displayDate}`;
-                surpriseDays.appendChild(option);
-            });
-        }
-
-        async function runSurpriseMe() {
+        function openSurpriseModal() {
             if (!hotelData) {
                 alert('Please set your hotel first.');
                 return;
@@ -1417,6 +1407,23 @@
                 return;
             }
 
+            const surpriseDays = document.getElementById('surprise-days');
+            surpriseDays.innerHTML = '<option value="all">All days</option>';
+            tripDays.forEach(day => {
+                const option = document.createElement('option');
+                option.value = day.dayNumber;
+                option.textContent = `Day ${day.dayNumber} — ${day.displayDate}`;
+                surpriseDays.appendChild(option);
+            });
+
+            document.getElementById('surprise-modal').style.display = 'flex';
+        }
+
+        function closeSurpriseModal() {
+            document.getElementById('surprise-modal').style.display = 'none';
+        }
+
+        async function runSurpriseMe() {
             const btn = document.getElementById('surprise-generate-btn');
             btn.textContent = 'Generating...';
             btn.disabled = true;
@@ -2796,8 +2803,11 @@ ${travelInfo}
         }
 
         document.addEventListener('click', function (e) {
-            const modal = document.getElementById('about-modal');
-            if (e.target === modal) closeAbout();
+            const aboutModal = document.getElementById('about-modal');
+            if (e.target === aboutModal) closeAbout();
+
+            const surpriseModal = document.getElementById('surprise-modal');
+            if (e.target === surpriseModal) closeSurpriseModal();
         });
 
         window.addEventListener('scroll', function () {
@@ -2859,6 +2869,83 @@ ${travelInfo}
             letter-spacing: 0.3px;">Feedback</a>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="surprise-modal" style="display: none; position: fixed; inset: 0; 
+    background: rgba(0,0,0,0.4); z-index: 1000; 
+    align-items: center; justify-content: center;">
+        <div style="background: #FFFFFF; max-width: 480px; width: 90%; 
+        padding: 40px; border-radius: 3px; position: relative;">
+            <span onclick="closeSurpriseModal()" style="position: absolute; top: 20px; right: 24px; 
+            cursor: pointer; font-size: 20px; color: #9B9B96;">×</span>
+            <h2 style="font-family: 'Cormorant Garamond', serif; font-weight: 300; 
+            font-size: 28px; margin-bottom: 8px;">Surprise Me</h2>
+            <p style="font-size: 13px; color: #9B9B96; margin-bottom: 24px;">
+                We'll find top-rated places near your hotel and fill your itinerary automatically.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label>Days to fill</label>
+                    <select id="surprise-days" style="width: 100%; margin-top: 6px;">
+                        <option value="all">All days</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <div style="flex: 1;">
+                        <label>Radius</label>
+                        <select id="surprise-radius" style="width: 100%; margin-top: 6px;">
+                            <option value="500">500m (0.3mi)</option>
+                            <option value="1000" selected>1km (0.6mi)</option>
+                            <option value="1600">1.6km (1mi)</option>
+                            <option value="3200">3.2km (2mi)</option>
+                            <option value="5000">5km (3.1mi)</option>
+                            <option value="8000">8km (5mi)</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Min Rating</label>
+                        <select id="surprise-rating" style="width: 100%; margin-top: 6px;">
+                            <option value="0">Any</option>
+                            <option value="3">3.0+</option>
+                            <option value="3.5" selected>3.5+</option>
+                            <option value="4">4.0+</option>
+                            <option value="4.5">4.5+</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Max Price</label>
+                        <select id="surprise-price" style="width: 100%; margin-top: 6px;">
+                            <option value="">Any</option>
+                            <option value="1">$</option>
+                            <option value="2">$$</option>
+                            <option value="3">$$$</option>
+                            <option value="4">$$$$</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 8px;">Categories</label>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                        <label style="text-transform: none; font-size: 13px; font-weight: 300;">
+                            <input type="checkbox" value="restaurant" checked> Restaurants</label>
+                        <label style="text-transform: none; font-size: 13px; font-weight: 300;">
+                            <input type="checkbox" value="bar" checked> Bars</label>
+                        <label style="text-transform: none; font-size: 13px; font-weight: 300;">
+                            <input type="checkbox" value="museum"> Museums</label>
+                        <label style="text-transform: none; font-size: 13px; font-weight: 300;">
+                            <input type="checkbox" value="park"> Parks</label>
+                        <label style="text-transform: none; font-size: 13px; font-weight: 300;">
+                            <input type="checkbox" value="shopping_mall"> Shopping</label>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="runSurpriseMe()" class="btn-primary" style="width: 100%; margin-top: 24px;"
+                id="surprise-generate-btn">
+                Generate Itinerary
+            </button>
         </div>
     </div>
 
