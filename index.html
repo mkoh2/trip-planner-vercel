@@ -1094,31 +1094,35 @@
         let tripEndDate = null;
         let venueAutocomplete = null;
 
-        let venues = {
-            "Restaurants/Quick Bites": [],
-            "Restaurants/Casual Dining": [],
-            "Restaurants/High-End": [],
-            "Restaurants/Cafe": [],
-            "Restaurants/Bakery": [],
-            "Bars/Dive": [],
-            "Bars/Specialty Cocktails": [],
-            "Bars/Wine": [],
-            "Bars/Brewery": [],
-            "Attractions/Museums": [],
-            "Attractions/Library": [],
-            "Attractions/Park": [],
-            "Shopping/Markets": [],
-            "Shopping/Stores": [],
-            "Shopping/Vintage": [],
-            "Attractions/Church": [],
-            "Attractions/Square": [],
-            "Attractions/Zoo": [],
-            "Attractions/Beach": [],
-            "Attractions/Viewpoint": [],
-        };
+        function createEmptyVenues() {
+            return {
+                "Restaurants/Quick Bites": [],
+                "Restaurants/Casual Dining": [],
+                "Restaurants/High-End": [],
+                "Restaurants/Cafe": [],
+                "Restaurants/Bakery": [],
+                "Bars/Dive": [],
+                "Bars/Specialty Cocktails": [],
+                "Bars/Wine": [],
+                "Bars/Brewery": [],
+                "Attractions/Museums": [],
+                "Attractions/Library": [],
+                "Attractions/Park": [],
+                "Shopping/Markets": [],
+                "Shopping/Stores": [],
+                "Shopping/Vintage": [],
+                "Attractions/Church": [],
+                "Attractions/Square": [],
+                "Attractions/Zoo": [],
+                "Attractions/Beach": [],
+                "Attractions/Viewpoint": [],
+            };
+        }
+        let venues = createEmptyVenues();
 
         let selectedVenue = null;
         let currentFilter = 'all';
+        let weatherData = null;
         let map = null;
         let hotelMarker = null;
         let venueMarkers = [];
@@ -1395,24 +1399,23 @@
 
             try {
                 for (let day of daysToFill) {
-                    const allPlaces = [];
-
-                    for (let type of checkedCategories) {
-                        const response = await fetch('/api/places-search', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                lat: hotelData.lat,
-                                lng: hotelData.lng,
-                                radius,
-                                type,
-                                minRating,
-                                maxPrice: maxPrice || undefined
-                            })
-                        });
-                        const data = await response.json();
-                        if (data.places) allPlaces.push(...data.places);
-                    }
+                    const placeResults = await Promise.all(
+                        checkedCategories.map(type =>
+                            fetch('/api/places-search', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    lat: hotelData.lat,
+                                    lng: hotelData.lng,
+                                    radius,
+                                    type,
+                                    minRating,
+                                    maxPrice: maxPrice || undefined
+                                })
+                            }).then(r => r.json()).then(data => data.places || [])
+                        )
+                    );
+                    const allPlaces = placeResults.flat();
 
                     // Group places by category type
                     const byType = {};
@@ -1801,33 +1804,23 @@
         }
 
         async function calculateDistances(venue) {
-            if (!hotelData) {
-
-                return Promise.resolve(null);
-            }
+            if (!hotelData) return null;
 
             try {
-                const walkingResponse = await fetch('/api/distance', {
+                const makeRequest = (mode) => fetch('/api/distance', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         origins: `${hotelData.lat},${hotelData.lng}`,
                         destinations: `${venue.lat},${venue.lng}`,
-                        mode: 'walking'
+                        mode
                     })
-                });
-                const walkingData = await walkingResponse.json();
+                }).then(r => r.json());
 
-                const drivingResponse = await fetch('/api/distance', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        origins: `${hotelData.lat},${hotelData.lng}`,
-                        destinations: `${venue.lat},${venue.lng}`,
-                        mode: 'driving'
-                    })
-                });
-                const drivingData = await drivingResponse.json();
+                const [walkingData, drivingData] = await Promise.all([
+                    makeRequest('walking'),
+                    makeRequest('driving')
+                ]);
 
                 if (walkingData.status === 'OK' && drivingData.status === 'OK') {
                     const walkingResult = walkingData.rows[0].elements[0];
@@ -1854,39 +1847,21 @@
 
         async function calculateVenueToVenueDistance(fromVenue, toVenue) {
             try {
-                const walkingResponse = await fetch('/api/distance', {
+                const makeRequest = (mode) => fetch('/api/distance', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         origins: `${fromVenue.lat},${fromVenue.lng}`,
                         destinations: `${toVenue.lat},${toVenue.lng}`,
-                        mode: 'walking'
+                        mode
                     })
-                });
-                const walkingData = await walkingResponse.json();
+                }).then(r => r.json());
 
-                const drivingResponse = await fetch('/api/distance', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        origins: `${fromVenue.lat},${fromVenue.lng}`,
-                        destinations: `${toVenue.lat},${toVenue.lng}`,
-                        mode: 'driving'
-                    })
-                });
-                const drivingData = await drivingResponse.json();
-
-                const transitResponse = await fetch('/api/distance', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        origins: `${fromVenue.lat},${fromVenue.lng}`,
-                        destinations: `${toVenue.lat},${toVenue.lng}`,
-                        mode: 'transit'
-                    })
-                });
-                const transitData = await transitResponse.json();
-
+                const [walkingData, drivingData, transitData] = await Promise.all([
+                    makeRequest('walking'),
+                    makeRequest('driving'),
+                    makeRequest('transit')
+                ]);
 
                 if (walkingData.status === 'OK' && drivingData.status === 'OK') {
                     const walkingResult = walkingData.rows[0].elements[0];
@@ -1921,15 +1896,18 @@
             if (!hotelData || tripDays.length === 0) return;
 
             try {
-                const response = await fetch('/api/weather', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        lat: hotelData.lat,
-                        lon: hotelData.lng
-                    })
-                });
-                const data = await response.json();
+                if (!weatherData) {
+                    const response = await fetch('/api/weather', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            lat: hotelData.lat,
+                            lon: hotelData.lng
+                        })
+                    });
+                    weatherData = await response.json();
+                }
+                const data = weatherData;
 
                 const forecastsByDate = {};
                 data.list.forEach(forecast => {
@@ -1998,12 +1976,12 @@
         }
 
         function displayHotel() {
+            weatherData = null;
             const display = document.getElementById('hotel-display');
             display.innerHTML = `<strong style="font-weight: 500;">${hotelData.name}</strong><br>${hotelData.address}`;
             updateHotelMarker();
             const hotelLocation = new google.maps.LatLng(hotelData.lat, hotelData.lng);
             initVenueSearch(hotelLocation);
-
         }
 
         async function saveTrip(silent = false) {
@@ -2091,23 +2069,9 @@
                 document.getElementById('trip-name').value = '';
                 hotelData = null;
                 tripDays = [];
-                venues = {
-                    "Restaurants/Quick Bites": [],
-                    "Restaurants/Casual Dining": [],
-                    "Restaurants/High-End": [],
-                    "Restaurants/Cafe": [],
-                    "Restaurants/Bakery": [],
-                    "Bars/Dive": [],
-                    "Bars/Specialty Cocktails": [],
-                    "Bars/Wine": [],
-                    "Bars/Brewery": [],
-                    "Attractions/Museums": [],
-                    "Attractions/Library": [],
-                    "Attractions/Park": [],
-                    "Shopping/Markets": [],
-                    "Shopping/Stores": []
-                };
+                venues = createEmptyVenues();
 
+                weatherData = null;
                 document.getElementById('hotel-display').innerHTML = '';
                 document.getElementById('hotel-search').value = '';
                 document.getElementById('list-display').innerHTML = '';
@@ -2272,15 +2236,9 @@
         function getOpenStatusBadge(venue, tripDate, timeString) {
             try {
                 if (!venue.openingHours || !venue.openingHours.weekday_text) {
-
                     return '';
                 }
 
-                const [year, month, day] = tripDate.split('-').map(Number);
-                const date = new Date(year, month - 1, day);
-                const dayOfWeek = date.getDay();
-                const hoursIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-                const hoursText = venue.openingHours.weekday_text[hoursIndex];
                 const hoursCheck = isVenueOpenAtTime(venue, tripDate, timeString);
 
                 if (hoursCheck.isOpen === false) {
@@ -2346,16 +2304,13 @@
                         return a.time.localeCompare(b.time);
                     });
 
-                    for (let i = 1; i < sortedVenues.length; i++) {
-                        const prevVenue = sortedVenues[i - 1];
-                        const currentVenue = sortedVenues[i];
-                        const travel = await calculateVenueToVenueDistance(prevVenue, currentVenue);
-                        currentVenue.travelFromPrevious = travel;
-                    }
-
-                    if (sortedVenues.length > 0) {
-                        sortedVenues[0].travelFromPrevious = null;
-                    }
+                    sortedVenues[0].travelFromPrevious = null;
+                    await Promise.all(
+                        sortedVenues.slice(1).map(async (currentVenue, i) => {
+                            const travel = await calculateVenueToVenueDistance(sortedVenues[i], currentVenue);
+                            currentVenue.travelFromPrevious = travel;
+                        })
+                    );
                 }
 
                 day.venues.forEach(venue => {
@@ -2402,7 +2357,7 @@
     ${sortedVenues.length > 0 ? renderTimeline(day, sortedVenues) : ''}
     
     ${sortedVenues.length > 0 ? `<div style="margin-top: 40px; padding-top: 24px; border-top: 2px solid #F0F0ED;"><h4 style="font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; color: #6B6B66; margin-bottom: 20px;">📍 Venue Details</h4></div>` : ''}
-    ${sortedVenues.map((v, idx) => renderVenueListItem(v, day, idx)).join('')}
+    ${sortedVenues.map((v, idx) => renderVenueListItem(v, day, idx, sortedVenues)).join('')}
 </div>
 </div>`;
         }
@@ -2448,14 +2403,9 @@
             return html;
         }
 
-        function renderVenueListItem(v, day, idx) {
+        function renderVenueListItem(v, day, idx, sortedVenues) {
             const actualIdx = day.venues.indexOf(v);
             const isFirst = idx === 0;
-            const sortedVenues = [...day.venues].sort((a, b) => {
-                if (!a.time) return 1;
-                if (!b.time) return -1;
-                return a.time.localeCompare(b.time);
-            });
 
             let travelInfo = '';
             if (!isFirst && v.travelFromPrevious) {

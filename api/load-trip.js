@@ -18,10 +18,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    await client.connect();
+    if (!client.isOpen) await client.connect();
     const tripDataString = await client.get(`trip:${id}`);
-    await client.disconnect();
-    
+
     if (!tripDataString) {
       return res.status(404).json({ error: 'Trip not found' });
     }
@@ -30,7 +29,6 @@ export default async function handler(req, res) {
     res.status(200).json({ tripData });
   } catch (error) {
     console.error('Load failed:', error);
-    await client.disconnect();
     res.status(500).json({ error: 'Load failed' });
   }
 }
