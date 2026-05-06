@@ -17,7 +17,7 @@ export default async function handler(req, res) {
         const filtered = (data.results || [])
             .filter(p => !minRating || (p.rating && p.rating >= minRating))
             .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-            .slice(0, 5)
+            .slice(0, 10)
             .map(p => ({
                 name: p.name,
                 address: p.vicinity,
