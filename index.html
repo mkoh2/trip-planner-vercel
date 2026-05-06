@@ -1066,6 +1066,13 @@
             document.getElementById('pdf-btn').addEventListener('click', saveTripAsPDF);
             document.getElementById('generate-days-btn').addEventListener('click', generateDays);
 
+            // Sync button label with actual form state on load
+            const form = document.getElementById('venue-form');
+            const btn = document.getElementById('venue-toggle-btn');
+            if (getComputedStyle(form).display === 'none') {
+                btn.textContent = 'Show ▼';
+            }
+
             displaySavedTrips();
         }
 
