@@ -1959,7 +1959,7 @@
             tripNames.forEach(name => {
                 const trip = savedTrips[name];
                 const date = new Date(trip.savedAt).toLocaleDateString();
-                html += `<div style="margin: 8px 0; display: flex; justify-content: space-between; align-items: center; padding: 8px 0;"><span style="cursor: pointer; color: #1A1A1A; font-size: 12px;" onclick="loadTrip('${name}')">${name}</span><div><span style="font-size: 12px; color: #9B9B96; margin-right: 12px;">${date}</span><button onclick="deleteTrip('${name}')" class="btn-delete" style="padding: 4px 12px;">Delete</button></div></div>`;
+                html += `<div style="margin: 8px 0; display: flex; justify-content: space-between; align-items: center; padding: 8px 0;"><span style="cursor: pointer; color: #1A1A1A; font-size: 10px;" onclick="loadTrip('${name}')">${name}</span><div><span style="font-size: 8px; color: #9B9B96; margin-right: 12px;">${date}</span><button onclick="deleteTrip('${name}')" class="btn-delete" style="padding: 4px 12px;">Delete</button></div></div>`;
             });
             html += '</div>';
             tripsList.innerHTML = html;
