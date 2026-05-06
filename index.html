@@ -959,7 +959,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
             <h2 style="margin: 0;">Itinerary</h2>
             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <button id="copy-btn" class="btn-primary">Copy as Text</button>
+                <button id="copy-btn" class="btn-primary" onclick="copyURL()">Copy URL</button>
                 <button id="pdf-btn" class="btn-primary">Save as PDF</button>
                 <label style="display: flex; align-items: center; gap: 8px; text-transform: none; font-size: 13px;">
                     <input type="checkbox" id="print-map-toggle" checked>
@@ -1062,7 +1062,6 @@
             document.getElementById('load-trip-btn').addEventListener('click', () => { displaySavedTrips(); });
             document.getElementById('new-trip-btn').addEventListener('click', newTrip);
             document.getElementById('print-btn').addEventListener('click', printTrip);
-            document.getElementById('copy-btn').addEventListener('click', copyTripAsText);
             document.getElementById('pdf-btn').addEventListener('click', saveTripAsPDF);
             document.getElementById('generate-days-btn').addEventListener('click', generateDays);
 
@@ -1075,8 +1074,6 @@
 
             displaySavedTrips();
         }
-
-        // Add this at the very end of the initMap() function, right before the closing }
 
         async function loadFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1111,7 +1108,6 @@
             }
         }
 
-        // Call it immediately
         loadFromURL();
 
         function initializeMap() {
@@ -1179,6 +1175,32 @@
 
             map.setCenter({ lat: hotelData.lat, lng: hotelData.lng });
             console.log('Hotel marker added:', hotelData.name);
+        }
+
+        async function copyURL() {
+            const tripName = document.getElementById('trip-name').value.trim();
+            if (!tripName) {
+                alert('Please enter a trip name before copying the URL.');
+                return;
+            }
+
+            const btn = document.getElementById('copy-btn');
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (!urlParams.get('trip')) {
+                btn.textContent = 'Saving...';
+                btn.disabled = true;
+                await saveTrip(true);
+                btn.textContent = 'Copy URL';
+                btn.disabled = false;
+            }
+
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ URL copied to clipboard!');
+            }).catch(() => {
+                alert(`Share this URL:\n${url}`);
+            });
         }
 
         function getCategoryColor(category) {
@@ -1558,7 +1580,6 @@
                 if (walkingData.status === 'OK' && drivingData.status === 'OK') {
                     const walkingResult = walkingData.rows[0].elements[0];
                     const drivingResult = drivingData.rows[0].elements[0];
-                    const transitResult = transitData.rows[0].elements[0];
 
                     return {
                         walking: {
@@ -1736,7 +1757,7 @@
             console.log('Venue search now biased toward hotel location');
         }
 
-        async function saveTrip() {
+        async function saveTrip(silent = false) {
             const tripName = document.getElementById('trip-name').value.trim();
             if (!tripName) {
                 alert('Please enter a trip name');
@@ -1752,7 +1773,6 @@
             };
 
             try {
-                // Save to server
                 const response = await fetch('/api/save-trip', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1762,24 +1782,23 @@
                 const result = await response.json();
 
                 if (result.tripId) {
-                    // Update URL
                     const url = new URL(window.location);
                     url.searchParams.set('trip', result.tripId);
                     window.history.pushState({}, '', url);
 
-                    // Copy URL to clipboard
-                    navigator.clipboard.writeText(url.toString()).then(() => {
-                        alert(`✅ Trip saved!\n\nShareable URL copied to clipboard:\n${url.toString()}`);
-                    }).catch(() => {
-                        alert(`✅ Trip saved!\n\nShare this URL:\n${url.toString()}`);
-                    });
+                    if (!silent) {
+                        navigator.clipboard.writeText(url.toString()).then(() => {
+                            alert(`✅ Trip saved!\n\nShareable URL copied to clipboard:\n${url.toString()}`);
+                        }).catch(() => {
+                            alert(`✅ Trip saved!\n\nShare this URL:\n${url.toString()}`);
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Save failed:', error);
                 alert('❌ Save failed. Please try again.');
             }
 
-            // Also save locally as backup
             let savedTrips = JSON.parse(localStorage.getItem('tripPlanner_trips') || '{}');
             savedTrips[tripName] = tripData;
             localStorage.setItem('tripPlanner_trips', JSON.stringify(savedTrips));
@@ -1891,7 +1910,7 @@
             mapSection.style.display = 'block';
         }
 
-        function copyTripAsText() {
+        function copyTripAsURL() {
             const tripName = document.getElementById('trip-name').value || 'My Trip';
 
             if (!hotelData || tripDays.length === 0) {
