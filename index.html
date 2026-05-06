@@ -1021,6 +1021,73 @@
                             <option value="Shopping/Vintage">Vintage</option>
                         </optgroup>
                     </select>
+
+                    <div id="surprise-panel"
+                        style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #F0F0ED;">
+                        <button onclick="toggleSurprisePanel()" id="surprise-btn"
+                            style="padding: 8px 16px; font-size: 11px; border-color: #D4D4D0; color: #9B9B96;">
+                            ✨ Surprise Me
+                        </button>
+
+                        <div id="surprise-options" style="display: none; margin-top: 16px;">
+                            <div class="input-row">
+                                <div>
+                                    <label>Days to fill</label>
+                                    <select id="surprise-days">
+                                        <option value="all">All days</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Radius</label>
+                                    <select id="surprise-radius">
+                                        <option value="500">500m</option>
+                                        <option value="1000" selected>1km</option>
+                                        <option value="2000">2km</option>
+                                        <option value="5000">5km</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Min Rating</label>
+                                    <select id="surprise-rating">
+                                        <option value="0">Any</option>
+                                        <option value="3">3.0+</option>
+                                        <option value="3.5" selected>3.5+</option>
+                                        <option value="4">4.0+</option>
+                                        <option value="4.5">4.5+</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Max Price</label>
+                                    <select id="surprise-price">
+                                        <option value="">Any</option>
+                                        <option value="1">$</option>
+                                        <option value="2">$$</option>
+                                        <option value="3">$$$</option>
+                                        <option value="4">$$$$</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px;">
+                                <label style="display: block; margin-bottom: 8px;">Categories to include</label>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <label style="text-transform: none; font-size: 13px;"><input type="checkbox"
+                                            value="restaurant" checked> Restaurants</label>
+                                    <label style="text-transform: none; font-size: 13px;"><input type="checkbox"
+                                            value="bar" checked> Bars</label>
+                                    <label style="text-transform: none; font-size: 13px;"><input type="checkbox"
+                                            value="museum"> Museums</label>
+                                    <label style="text-transform: none; font-size: 13px;"><input type="checkbox"
+                                            value="park"> Parks</label>
+                                    <label style="text-transform: none; font-size: 13px;"><input type="checkbox"
+                                            value="shopping_mall"> Shopping</label>
+                                </div>
+                            </div>
+                            <button onclick="runSurpriseMe()" class="btn-primary" style="margin-top: 16px;"
+                                id="surprise-generate-btn">
+                                Generate Itinerary
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label>Day</label>
@@ -1320,6 +1387,109 @@
                 'Shopping/Stores': '#9B8B7E'
             };
             return colors[category] || '#6B6B66';
+        }
+
+        function toggleSurprisePanel() {
+            const options = document.getElementById('surprise-options');
+            const isVisible = getComputedStyle(options).display !== 'none';
+            options.style.display = isVisible ? 'none' : 'block';
+
+            // Populate days dropdown
+            const surpriseDays = document.getElementById('surprise-days');
+            surpriseDays.innerHTML = '<option value="all">All days</option>';
+            tripDays.forEach(day => {
+                const option = document.createElement('option');
+                option.value = day.dayNumber;
+                option.textContent = `Day ${day.dayNumber} — ${day.displayDate}`;
+                surpriseDays.appendChild(option);
+            });
+        }
+
+        async function runSurpriseMe() {
+            if (!hotelData) {
+                alert('Please set your hotel first.');
+                return;
+            }
+            if (tripDays.length === 0) {
+                alert('Please generate days first.');
+                return;
+            }
+
+            const btn = document.getElementById('surprise-generate-btn');
+            btn.textContent = 'Generating...';
+            btn.disabled = true;
+
+            const radius = document.getElementById('surprise-radius').value;
+            const minRating = parseFloat(document.getElementById('surprise-rating').value);
+            const maxPrice = document.getElementById('surprise-price').value;
+            const selectedDay = document.getElementById('surprise-days').value;
+            const checkedCategories = [...document.querySelectorAll('#surprise-options input[type="checkbox"]:checked')]
+                .map(cb => cb.value);
+
+            if (checkedCategories.length === 0) {
+                alert('Please select at least one category.');
+                btn.textContent = 'Generate Itinerary';
+                btn.disabled = false;
+                return;
+            }
+
+            const daysToFill = selectedDay === 'all'
+                ? tripDays
+                : tripDays.filter(d => d.dayNumber === parseInt(selectedDay));
+
+            try {
+                for (let day of daysToFill) {
+                    const allPlaces = [];
+
+                    for (let type of checkedCategories) {
+                        const response = await fetch('/api/places-search', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                lat: hotelData.lat,
+                                lng: hotelData.lng,
+                                radius,
+                                type,
+                                minRating,
+                                maxPrice: maxPrice || undefined
+                            })
+                        });
+                        const data = await response.json();
+                        if (data.places) allPlaces.push(...data.places);
+                    }
+
+                    // Assign time slots starting at 9am, 90 min apart
+                    const timeSlots = ['09:00', '10:30', '12:00', '13:30', '15:00', '16:30', '19:00', '20:30'];
+                    const shuffled = allPlaces.sort(() => Math.random() - 0.5).slice(0, timeSlots.length);
+
+                    for (let i = 0; i < shuffled.length; i++) {
+                        const place = shuffled[i];
+                        const category = getCategoryFromTypes(place.types);
+                        const distances = await calculateDistances(place);
+
+                        day.venues.push({
+                            ...place,
+                            category,
+                            time: timeSlots[i],
+                            duration: getDefaultDuration(category),
+                            legTravelMode: 'driving',
+                            walking: distances ? distances.walking : null,
+                            driving: distances ? distances.driving : null
+                        });
+                    }
+                }
+
+                displayDaysTimeline();
+                updateDayDropdown();
+                document.getElementById('surprise-options').style.display = 'none';
+
+            } catch (error) {
+                console.error('Surprise Me failed:', error);
+                alert('Something went wrong. Please try again.');
+            } finally {
+                btn.textContent = 'Generate Itinerary';
+                btn.disabled = false;
+            }
         }
 
         function updateVenueMarkers() {
@@ -2477,6 +2647,17 @@ ${travelInfo}
 
             day.venues[venueIndex].legTravelMode = mode;
             displayDaysTimeline();
+        }
+
+        function getCategoryFromTypes(types) {
+            if (types.includes('bar') || types.includes('night_club')) return 'Bars/Specialty Cocktails';
+            if (types.includes('bakery')) return 'Restaurants/Bakery';
+            if (types.includes('cafe')) return 'Restaurants/Cafe';
+            if (types.includes('restaurant')) return 'Restaurants/Casual Dining';
+            if (types.includes('museum') || types.includes('art_gallery')) return 'Attractions/Museums';
+            if (types.includes('park')) return 'Attractions/Park';
+            if (types.includes('shopping_mall') || types.includes('store')) return 'Shopping/Stores';
+            return 'Attractions/Park';
         }
 
         function editVenueCategory(dayNumber, venueIndex) {
