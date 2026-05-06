@@ -958,36 +958,38 @@
         <div id="map"></div>
     </div>
 
-    <div class="section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-            <h2 style="margin: 0;">Itinerary</h2>
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <button id="copy-btn" class="btn-primary" onclick="copyURL()">Copy URL</button>
-                <button id="pdf-btn" class="btn-primary">Save as PDF</button>
-                <label style="display: flex; align-items: center; gap: 8px; text-transform: none; font-size: 13px;">
-                    <input type="checkbox" id="print-map-toggle" checked>
-                    Include map
-                </label>
-                <button id="print-btn">Print</button>
-            </div>
-        </div>
+    <div style="margin-bottom: 32px;">
+        <h2 style="margin: 0;">Itinerary</h2>
+    </div>
 
-        <div id="filter-buttons" style="margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #F0F0ED;">
-            <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="restaurants">Restaurants</button>
-            <button class="filter-btn" data-filter="bars">Bars</button>
-            <button class="filter-btn" data-filter="Restaurants/Quick Bites">Quick Bites</button>
-            <button class="filter-btn" data-filter="Restaurants/Casual Dining">Casual Dining</button>
-            <button class="filter-btn" data-filter="Restaurants/High-End">High-End</button>
-            <button class="filter-btn" data-filter="Restaurants/Cafe">Cafe</button>
-            <button class="filter-btn" data-filter="Restaurants/Bakery">Bakery</button>
-            <button class="filter-btn" data-filter="Bars/Dive">Dive</button>
-            <button class="filter-btn" data-filter="Bars/Specialty Cocktails">Cocktails</button>
-            <button class="filter-btn" data-filter="Bars/Wine">Wine</button>
-            <button class="filter-btn" data-filter="Bars/Brewery">Brewery</button>
-        </div>
+    <div id="filter-buttons" style="margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #F0F0ED;">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="restaurants">Restaurants</button>
+        <button class="filter-btn" data-filter="bars">Bars</button>
+        <button class="filter-btn" data-filter="Restaurants/Quick Bites">Quick Bites</button>
+        <button class="filter-btn" data-filter="Restaurants/Casual Dining">Casual Dining</button>
+        <button class="filter-btn" data-filter="Restaurants/High-End">High-End</button>
+        <button class="filter-btn" data-filter="Restaurants/Cafe">Cafe</button>
+        <button class="filter-btn" data-filter="Restaurants/Bakery">Bakery</button>
+        <button class="filter-btn" data-filter="Bars/Dive">Dive</button>
+        <button class="filter-btn" data-filter="Bars/Specialty Cocktails">Cocktails</button>
+        <button class="filter-btn" data-filter="Bars/Wine">Wine</button>
+        <button class="filter-btn" data-filter="Bars/Brewery">Brewery</button>
+    </div>
 
-        <div id="list-display"></div>
+    <div id="list-display"></div>
+
+    <div id="list-display"></div>
+
+    <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #F0F0ED; 
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <button id="copy-btn" class="btn-primary" onclick="copyURL()">Copy URL</button>
+        <button id="pdf-btn" class="btn-primary">Save as PDF</button>
+        <label style="display: flex; align-items: center; gap: 8px; text-transform: none; font-size: 13px;">
+            <input type="checkbox" id="print-map-toggle" checked> Include map
+        </label>
+        <button id="print-btn">Print</button>
+    </div>
     </div>
 
     <div class="section"
@@ -1061,7 +1063,6 @@
             setupFilterButtons();
 
             document.getElementById('add-venue-btn').addEventListener('click', addVenueToList);
-            document.getElementById('save-trip-btn').addEventListener('click', saveTrip);
             document.getElementById('load-trip-btn').addEventListener('click', () => { displaySavedTrips(); });
             document.getElementById('new-trip-btn').addEventListener('click', newTrip);
             document.getElementById('print-btn').addEventListener('click', printTrip);
