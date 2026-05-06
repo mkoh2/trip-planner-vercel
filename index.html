@@ -1243,8 +1243,18 @@
                 }
             });
 
+            const dayInfo = day ? `<div style="font-size: 11px; color: #9B9B96; margin-bottom: 4px;">Day ${day.dayNumber} — ${day.displayDate}</div>` : '';
+
             const infoWindow = new google.maps.InfoWindow({
-                content: `<div style="font-family: Inter, sans-serif; padding: 4px;"><strong style="font-weight: 500;">${hotelData.name}</strong><br><span style="font-size: 13px; color: #6B6B66;">${hotelData.address}</span></div>`
+                content: `<div style="font-family: Inter, sans-serif; padding: 4px;">
+        ${dayInfo}
+        ${timeInfo}
+        <strong style="font-weight: 500;">${venue.name}</strong>
+        <br>
+        <span style="font-size: 12px; color: #6B6B66;">
+            ${venue.address}<br>${walkingInfo} ${drivingInfo}
+        </span>
+    </div>`
             });
 
             hotelMarker.addListener('click', function () {
@@ -1326,7 +1336,7 @@
                 let markerNum = 1;
                 tripDays.forEach(day => {
                     day.venues.forEach(venue => {
-                        createVenueMarker(venue, venue.category, markerNum.toString());
+                        createVenueMarker(venue, venue.category, markerNum.toString(), day);
                         markerNum++;
                     });
                 });
@@ -1335,7 +1345,7 @@
             console.log('Venue markers updated:', venueMarkers.length);
         }
 
-        function createVenueMarker(venue, category, label) {
+        function createVenueMarker(venue, category, label, day = null) {
             const marker = new google.maps.Marker({
                 position: { lat: venue.lat, lng: venue.lng },
                 map: map,
