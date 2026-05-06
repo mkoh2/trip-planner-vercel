@@ -929,10 +929,16 @@
                             <option value="Attractions/Museums">Museums</option>
                             <option value="Attractions/Library">Library</option>
                             <option value="Attractions/Park">Park</option>
+                            <option value="Attractions/Church">Church</option>
+                            <option value="Attractions/Square">Square / Piazza</option>
+                            <option value="Attractions/Zoo">Zoo</option>
+                            <option value="Attractions/Beach">Beach</option>
+                            <option value="Attractions/Viewpoint">Viewpoint</option>
                         </optgroup>
                         <optgroup label="Shopping">
                             <option value="Shopping/Markets">Markets</option>
                             <option value="Shopping/Stores">Stores</option>
+                            <option value="Shopping/Vintage">Vintage</option>
                         </optgroup>
                     </select>
                 </div>
@@ -1022,7 +1028,13 @@
             "Attractions/Library": [],
             "Attractions/Park": [],
             "Shopping/Markets": [],
-            "Shopping/Stores": []
+            "Shopping/Stores": [],
+            "Shopping/Vintage": [],
+            "Attractions/Church": [],
+            "Attractions/Square": [],
+            "Attractions/Zoo": [],
+            "Attractions/Beach": [],
+            "Attractions/Viewpoint": [],
         };
 
         let selectedVenue = null;
@@ -2050,17 +2062,23 @@
                 'Restaurants/Quick Bites': 30,
                 'Restaurants/Casual Dining': 90,
                 'Restaurants/High-End': 120,
-                'Restaurants/Cafe': 45,
+                'Restaurants/Cafe': 20,
                 'Restaurants/Bakery': 20,
                 'Bars/Dive': 90,
                 'Bars/Specialty Cocktails': 90,
                 'Bars/Wine': 90,
                 'Bars/Brewery': 90,
                 'Attractions/Museums': 120,
-                'Attractions/Library': 60,
-                'Attractions/Park': 90,
+                'Attractions/Library': 30,
+                'Attractions/Park': 60,
                 'Shopping/Markets': 60,
-                'Shopping/Stores': 60
+                'Shopping/Stores': 30,
+                'Shopping/Vintage': 45,
+                'Attractions/Church': 30,
+                'Attractions/Square': 15,
+                'Attractions/Zoo': 120,
+                'Attractions/Beach': 120,
+                'Attractions/Viewpoint': 45,
             };
             return durations[category] || 60;
         }
@@ -2474,7 +2492,13 @@ ${travelInfo}
                 "Attractions/Library",
                 "Attractions/Park",
                 "Shopping/Markets",
-                "Shopping/Stores"
+                "Shopping/Stores",
+                "Shopping/Vintage",
+                "Attractions/Church",
+                "Attractions/Square",
+                "Attractions/Zoo",
+                "Attractions/Beach",
+                "Attractions/Viewpoint",
             ];
 
             let options = "Choose new category:\n\n";
