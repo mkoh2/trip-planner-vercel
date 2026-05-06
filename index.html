@@ -332,6 +332,10 @@
             z-index: 500;
         }
 
+        #site-header.shrunk #about-link {
+            opacity: 1;
+        }
+
         #header-wordmark {
             font-family: 'Cormorant Garamond', serif;
             font-weight: 300;
@@ -898,6 +902,9 @@
 <body>
     <header id="site-header">
         <span id="header-wordmark">L O C A T I O N A R Y</span>
+        <span onclick="openAbout()" style="position: absolute; right: 24px; font-size: 11px; 
+        letter-spacing: 0.5px; text-transform: uppercase; 
+        color: #9B9B96; cursor: pointer; opacity: 0; transition: opacity 0.3s ease;" id="about-link">About</span>
     </header>
     <div id="trip-management"
         style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
@@ -2647,6 +2654,21 @@ ${travelInfo}
             }
         }
 
+        function openAbout() {
+            const modal = document.getElementById('about-modal');
+            modal.style.display = 'flex';
+        }
+
+        function closeAbout() {
+            const modal = document.getElementById('about-modal');
+            modal.style.display = 'none';
+        }
+
+        document.addEventListener('click', function (e) {
+            const modal = document.getElementById('about-modal');
+            if (e.target === modal) closeAbout();
+        });
+
         window.addEventListener('scroll', function () {
             console.log('scrollY:', window.scrollY);
             const header = document.getElementById('site-header');
@@ -2658,12 +2680,61 @@ ${travelInfo}
                 document.body.style.paddingTop = '0';
             }
         });
-        
+
     </script>
 
     <script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8JmsDj85EQ73OlWokJIr85KXcNvEdzeY&libraries=places&callback=initMap"
         async defer></script>
+
+    <div id="about-modal" style="display: none; position: fixed; inset: 0; 
+    background: rgba(0,0,0,0.4); z-index: 1000; 
+    align-items: center; justify-content: center;">
+        <div style="background: #FFFFFF; max-width: 480px; width: 90%; 
+        padding: 48px; border-radius: 3px; position: relative;">
+            <span onclick="closeAbout()" style="position: absolute; top: 20px; right: 24px; 
+            cursor: pointer; font-size: 20px; color: #9B9B96;">×</span>
+            <h2 style="font-family: 'Cormorant Garamond', serif; font-weight: 300; 
+            font-size: 28px; margin-bottom: 16px;">Locationary</h2>
+            <p style="font-size: 14px; color: #4A4A45; line-height: 1.8; margin-bottom: 32px;">
+                A trip planner built around where you're staying. Add your hotel once —
+                every venue, distance, and travel time anchors to it automatically.
+            </p>
+            <div style="border-top: 1px solid #F0F0ED; padding-top: 24px;">
+                <div style="margin-bottom: 16px; display: flex; gap: 16px; align-items: start;">
+                    <span style="font-size: 18px;">🏨</span>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">Set your hotel</div>
+                        <div style="font-size: 12px; color: #9B9B96;">Your home base for the trip</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 16px; display: flex; gap: 16px; align-items: start;">
+                    <span style="font-size: 18px;">📍</span>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">Add venues</div>
+                        <div style="font-size: 12px; color: #9B9B96;">Restaurants, attractions, bars — anything</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 16px; align-items: start;">
+                    <span style="font-size: 18px;">🗺️</span>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">Share your plan</div>
+                        <div style="font-size: 12px; color: #9B9B96;">One URL, shareable with anyone</div>
+                    </div>
+                </div>
+            </div>
+            <div style="border-top: 1px solid #F0F0ED; margin-top: 32px; padding-top: 24px; 
+    display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: #9B9B96;">Built by Michael Koh</span>
+                <div style="display: flex; gap: 16px;">
+                    <a href="https://github.com/mkoh2/trip-planner-vercel" target="_blank" style="font-size: 12px; color: #9B9B96; text-decoration: none; 
+            letter-spacing: 0.3px;">GitHub</a>
+                    <a href="mailto:feedback@locationary.app" target="_blank" style="font-size: 12px; color: #9B9B96; text-decoration: none;
+            letter-spacing: 0.3px;">Feedback</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
