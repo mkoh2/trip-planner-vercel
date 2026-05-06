@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Planner</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-weight: 300;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 40px;
+        background: #FAFAF8;
+        color: #1A1A1A;
+        line-height: 1.6;
+    }
+
+    h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-weight: 300;
+        font-size: 48px;
+        letter-spacing: -0.5px;
+        margin-bottom: 60px;
+        color: #1A1A1A;
+    }
+
+    h2 {
+        font-family: 'Cormorant Garamond', serif;
+        font-weight: 400;
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: #2A2A2A;
+        letter-spacing: -0.3px;
+    }
+
+    h3 {
+        font-family: 'Cormorant Garamond', serif;
+        font-weight: 400;
+        font-size: 24px;
+        color: #2A2A2A;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    select {
+        font-family: 'Inter', sans-serif;
+        font-weight: 300;
+        padding: 12px 16px;
+        border: 1px solid #D4D4D0;
+        background: #FFFFFF;
+        border-radius: 2px;
+        font-size: 14px;
+        color: #1A1A1A;
+        transition: all 0.2s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="time"]:focus,
+    select:focus {
+        outline: none;
+        border-color: #6B6B66;
+        background: #FFFFFF;
+    }
+
+    button {
+        font-family: 'Inter', sans-serif;
+        font-weight: 400;
+        padding: 12px 24px;
+        border: 1px solid #1A1A1A;
+        background: #FFFFFF;
+        color: #1A1A1A;
+        border-radius: 2px;
+        cursor: pointer;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        transition: all 0.2s ease;
+    }
+
+    button:hover {
+        background: #1A1A1A;
+        color: #FFFFFF;
+    }
+
+    button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .section {
+        background: #FFFFFF;
+        padding: 40px;
+        margin-bottom: 40px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        border-radius: 3px;
+    }
+
+    .filter-btn {
+        padding: 8px 16px;
+        margin: 4px;
+        border: 1px solid #E8E8E5;
+        background: #FFFFFF;
+        color: #4A4A45;
+        font-size: 12px;
+        letter-spacing: 0.3px;
+        text-transform: none;
+    }
+
+    .filter-btn.active {
+        background: #F5F5F3;
+        border-color: #6B6B66;
+        color: #1A1A1A;
+    }
+
+    .filter-btn:hover {
+        background: #F5F5F3;
+        border-color: #6B6B66;
+        color: #1A1A1A;
+    }
+
+    .venue-item {
+        padding: 24px 0;
+        border-bottom: 1px solid #F0F0ED;
+    }
+
+    .venue-item:last-child {
+        border-bottom: none;
+    }
+
+    .day-card {
+        background: #FFFFFF;
+        border: 1px solid #E8E8E5;
+        border-radius: 3px;
+        padding: 32px;
+        margin-bottom: 24px;
+    }
+
+    .time-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        background: #1A1A1A;
+        color: #FFFFFF;
+        border-radius: 2px;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+    }
+
+    .status-open {
+        display: inline-block;
+        padding: 6px 14px;
+        background: #E8F5E9;
+        color: #2E7D32;
+        border-radius: 2px;
+        font-size: 11px;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        margin-left: 8px;
+    }
+
+    .status-closed {
+        display: inline-block;
+        padding: 6px 14px;
+        background: #FFEBEE;
+        color: #C62828;
+        border-radius: 2px;
+        font-size: 11px;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        margin-left: 8px;
+    }
+
+    .travel-info {
+        background: #F8F8F6;
+        padding: 16px 20px;
+        margin: 16px 0;
+        border-left: 2px solid #D4D4D0;
+        font-size: 13px;
+        color: #4A4A45;
+    }
+
+    .conflict-warning {
+        background: #FFF3E0;
+        color: #E65100;
+        padding: 12px 16px;
+        margin-top: 12px;
+        border-radius: 2px;
+        font-size: 12px;
+        font-weight: 400;
+    }
+
+    .conflict-error {
+        background: #FFEBEE;
+        color: #C62828;
+        padding: 12px 16px;
+        margin-top: 12px;
+        border-radius: 2px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .category-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        background: #F5F5F3;
+        color: #4A4A45;
+        border-radius: 2px;
+        font-size: 10px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-left: 8px;
+    }
+
+    .btn-primary {
+        background: #1A1A1A;
+        color: #FFFFFF;
+        border-color: #1A1A1A;
+    }
+
+    .btn-primary:hover {
+        background: #000000;
+        border-color: #000000;
+    }
+
+    .btn-delete {
+        background: transparent;
+        border-color: #C62828;
+        color: #C62828;
+        padding: 8px 16px;
+        font-size: 11px;
+    }
+
+    .btn-delete:hover {
+        background: #C62828;
+        color: #FFFFFF;
+    }
+
+    .btn-edit {
+        background: transparent;
+        border-color: #4A4A45;
+        color: #4A4A45;
+        padding: 8px 16px;
+        font-size: 11px;
+    }
+
+    .btn-edit:hover {
+        background: #4A4A45;
+        color: #FFFFFF;
+    }
+
+    label {
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: #6B6B66;
+        margin-right: 8px;
+    }
+
+    #map {
+        height: 500px;
+        border: 1px solid #E8E8E5;
+        border-radius: 3px;
+    }
+
+    .venue-name {
+        font-size: 16px;
+        font-weight: 400;
+        color: #1A1A1A;
+        margin-bottom: 8px;
+    }
+
+    .venue-details {
+        font-size: 13px;
+        color: #6B6B66;
+        line-height: 1.8;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    @media print {
+        body {
+            background: white;
+            padding: 0;
+            margin: 0;
+        }
+
+        .section {
+            display: none !important;
+        }
+
+        .section:has(#list-display) {
+            display: block !important;
+            padding: 0;
+        }
+
+        button {
+            display: none !important;
+        }
+
+        h3>span {
+            display: none !important;
+        }
+
+        [id^="weather-day-"] {
+            display: none !important;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin: 0 0 12px 0;
+            padding: 16px;
+        }
+
+        .day-card {
+            border: none;
+            padding: 0;
+            margin: 0 0 12px 0;
+            page-break-inside: auto;
+        }
+
+        h3 {
+            font-size: 16px;
+            margin: 0;
+            padding: 8px 16px;
+            background: #F5F5F3;
+            page-break-after: avoid;
+        }
+
+        .venue-item {
+            padding: 8px 16px;
+            margin: 0;
+            border-bottom: 1px solid #F0F0ED;
+            page-break-inside: avoid;
+        }
+
+        .venue-item:last-child {
+            border-bottom: none;
+        }
+
+        .venue-name {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .travel-info {
+            padding: 6px 12px;
+            margin: 4px 0;
+            font-size: 11px;
+            page-break-inside: avoid;
+        }
+
+        .venue-details {
+            font-size: 11px;
+            line-height: 1.3;
+            margin: 0;
+        }
+
+        .time-badge {
+            padding: 4px 10px;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .status-open,
+        .status-closed {
+            padding: 3px 8px;
+            font-size: 10px;
+        }
+
+        .category-badge {
+            padding: 2px 6px;
+            font-size: 9px;
+        }
+
+        .conflict-warning,
+        .conflict-error {
+            padding: 6px 10px;
+            margin-top: 4px;
+            font-size: 10px;
+        }
+    }
+</style>
+</head>
+<body>
+    <h1>Trip Planner</h1>
+<div class="section" id="trip-management">
+    <div class="input-group">
+        <label>Trip Name</label>
+        <input type="text" id="trip-name" placeholder="Mexico City, May 2026"
+            style="width: 100%; max-width: 400px;">
+    </div>
+
+    <div style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <button id="save-trip-btn" class="btn-primary">Save Trip</button>
+        <button id="load-trip-btn">Load Trip</button>
+        <button id="new-trip-btn">New Trip</button>
+    </div>
+
+    <div id="saved-trips-list" style="margin-top: 24px;"></div>
+</div>
+
+<div class="section" id="hotel-section">
+    <h2>Hotel</h2>
+    <p style="color: #6B6B66; font-size: 13px; margin-bottom: 16px;">Select your hotel first - all venues and
+        distances will be relative to this location.</p>
+    <input type="text" id="hotel-search" placeholder="Search for your hotel..."
+        style="width: 100%; max-width: 500px;">
+    <div id="hotel-display" style="margin-top: 16px; color: #6B6B66; font-size: 14px;"></div>
+</div>
+
+<div class="section" id="trip-dates-section">
+    <h2>Trip Dates</h2>
+    <div class="input-row">
+        <div>
+            <label>Start Date</label>
+            <input type="date" id="trip-start-date">
+        </div>
+        <div>
+            <label>End Date</label>
+            <input type="date" id="trip-end-date">
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+            <button id="generate-days-btn" class="btn-primary">Generate Days</button>
+        </div>
+    </div>
+</div>
+
+<div class="section" id="venue-section"
+    style="position: sticky; top: 15px; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="margin: 0;">Add Venues</h2>
+        <button onclick="toggleVenueForm()" id="venue-toggle-btn" style="padding: 8px 16px; font-size: 11px;">Hide
+            ▲</button>
+    </div>
+
+    <div id="venue-form">
+        <input type="text" id="venue-search" placeholder="Search for restaurants, bars, attractions..."
+            style="width: 100%; max-width: 500px; margin-bottom: 20px;">
+
+        <div class="input-row">
+            <div>
+                <label>Category</label>
+                <select id="category-select">
+                    <option value="">Select Category</option>
+                    <optgroup label="Restaurants">
+                        <option value="Restaurants/Quick Bites">Quick Bites</option>
+                        <option value="Restaurants/Casual Dining">Casual Dining</option>
+                        <option value="Restaurants/High-End">High-End</option>
+                        <option value="Restaurants/Cafe">Cafe</option>
+                        <option value="Restaurants/Bakery">Bakery</option>
+                    </optgroup>
+                    <optgroup label="Bars">
+                        <option value="Bars/Dive">Dive Bar</option>
+                        <option value="Bars/Specialty Cocktails">Specialty Cocktails</option>
+                        <option value="Bars/Wine">Wine Bar</option>
+                        <option value="Bars/Brewery">Brewery</option>
+                    </optgroup>
+                    <optgroup label="Attractions">
+                        <option value="Attractions/Museums">Museums</option>
+                        <option value="Attractions/Library">Library</option>
+                        <option value="Attractions/Park">Park</option>
+                    </optgroup>
+                    <optgroup label="Shopping">
+                        <option value="Shopping/Markets">Markets</option>
+                        <option value="Shopping/Stores">Stores</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <label>Day</label>
+                <select id="day-select">
+                    <option value="">Select Day</option>
+                </select>
+            </div>
+            <div>
+                <label>Time</label>
+                <input type="time" id="venue-time">
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+                <button id="add-venue-btn" class="btn-primary">Add Venue</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2>Map</h2>
+    <div id="map"></div>
+</div>
+
+<div class="section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <h2 style="margin: 0;">Itinerary</h2>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <button id="copy-btn" class="btn-primary">Copy as Text</button>
+            <button id="pdf-btn" class="btn-primary">Save as PDF</button>
+            <label style="display: flex; align-items: center; gap: 8px; text-transform: none; font-size: 13px;">
+                <input type="checkbox" id="print-map-toggle" checked>
+                Include map
+            </label>
+            <button id="print-btn">Print</button>
+        </div>
+    </div>
+
+    <div id="filter-buttons" style="margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #F0F0ED;">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="restaurants">Restaurants</button>
+        <button class="filter-btn" data-filter="bars">Bars</button>
+        <button class="filter-btn" data-filter="Restaurants/Quick Bites">Quick Bites</button>
+        <button class="filter-btn" data-filter="Restaurants/Casual Dining">Casual Dining</button>
+        <button class="filter-btn" data-filter="Restaurants/High-End">High-End</button>
+        <button class="filter-btn" data-filter="Restaurants/Cafe">Cafe</button>
+        <button class="filter-btn" data-filter="Restaurants/Bakery">Bakery</button>
+        <button class="filter-btn" data-filter="Bars/Dive">Dive</button>
+        <button class="filter-btn" data-filter="Bars/Specialty Cocktails">Cocktails</button>
+        <button class="filter-btn" data-filter="Bars/Wine">Wine</button>
+        <button class="filter-btn" data-filter="Bars/Brewery">Brewery</button>
+    </div>
+
+    <div id="list-display"></div>
+</div>
+
+<div class="section"
+    style="position: sticky; bottom: 0; background: #FFFFFF; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); padding: 12px 40px; margin-bottom: 0;">
+    <div style="display: flex; gap: 8px; justify-content: center;">
+        <button onclick="saveTrip()" class="btn-primary" style="padding: 8px 16px; font-size: 11px;">Save
+            Trip</button>
+        <button onclick="newTrip()" style="padding: 8px 16px; font-size: 11px;">New Trip</button>
+    </div>
+</div>
+
+<script>
+    const GOOGLE_API_KEY = 'AIzaSyC8JmsDj85EQ73OlWokJIr85KXcNvEdzeY';
+
+    let hotelData = null;
+    let tripDays = [];
+    let tripStartDate = null;
+    let tripEndDate = null;
+    let venueAutocomplete = null;
+
+    let venues = {
+        "Restaurants/Quick Bites": [],
+        "Restaurants/Casual Dining": [],
+        "Restaurants/High-End": [],
+        "Restaurants/Cafe": [],
+        "Restaurants/Bakery": [],
+        "Bars/Dive": [],
+        "Bars/Specialty Cocktails": [],
+        "Bars/Wine": [],
+        "Bars/Brewery": [],
+        "Attractions/Museums": [],
+        "Attractions/Library": [],
+        "Attractions/Park": [],
+        "Shopping/Markets": [],
+        "Shopping/Stores": []
+    };
+
+    let selectedVenue = null;
+    let currentFilter = 'all';
+    let map = null;
+    let hotelMarker = null;
+    let venueMarkers = [];
+    let collapsedDays = new Set();
+
+    function generateDaysFromDates(startDate, endDate) {
+        tripDays = [];
+        const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+        const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
+        const start = new Date(startYear, startMonth - 1, startDay);
+        const end = new Date(endYear, endMonth - 1, endDay);
+
+        let dayNum = 1;
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            tripDays.push({
+                dayNumber: dayNum,
+                date: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
+                displayDate: d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+                venues: []
+            });
+            dayNum++;
+        }
+        console.log('Generated days:', tripDays);
+        return tripDays;
+    }
+
+    function initMap() {
+        console.log('Google Maps API loaded!');
+        initializeMap();
+        initHotelSearch();
+        initVenueSearch();
+        setupFilterButtons();
+
+        document.getElementById('add-venue-btn').addEventListener('click', addVenueToList);
+        document.getElementById('save-trip-btn').addEventListener('click', saveTrip);
+        document.getElementById('load-trip-btn').addEventListener('click', () => { displaySavedTrips(); });
+        document.getElementById('new-trip-btn').addEventListener('click', newTrip);
+        document.getElementById('print-btn').addEventListener('click', printTrip);
+        document.getElementById('copy-btn').addEventListener('click', copyTripAsText);
+        document.getElementById('pdf-btn').addEventListener('click', saveTripAsPDF);
+        document.getElementById('generate-days-btn').addEventListener('click', generateDays);
+
+        displaySavedTrips();
+    }
+
+    function initializeMap() {
+        const defaultCenter = { lat: 40.7128, lng: -74.0060 };
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 13,
+            center: defaultCenter,
+            mapTypeControl: true,
+            streetViewControl: false,
+            styles: [
+                {
+                    "featureType": "all",
+                    "elementType": "geometry",
+                    "stylers": [{ "color": "#F5F5F3" }]
+                },
+                {
+                    "featureType": "water",
+                    "elementType": "geometry",
+                    "stylers": [{ "color": "#D4D4D0" }]
+                },
+                {
+                    "featureType": "road",
+                    "elementType": "geometry",
+                    "stylers": [{ "color": "#FFFFFF" }]
+                }
+            ]
+        });
+        console.log('Map initialized');
+    }
+
+    function updateHotelMarker() {
+        if (!hotelData || !map) return;
+
+        if (hotelMarker) {
+            hotelMarker.setMap(null);
+        }
+
+        hotelMarker = new google.maps.Marker({
+            position: { lat: hotelData.lat, lng: hotelData.lng },
+            map: map,
+            title: hotelData.name,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 10,
+                fillColor: '#1A1A1A',
+                fillOpacity: 1,
+                strokeColor: '#FFFFFF',
+                strokeWeight: 3
+            },
+            label: {
+                text: 'H',
+                color: '#FFFFFF',
+                fontSize: '12px',
+                fontWeight: '500'
+            }
+        });
+
+        const infoWindow = new google.maps.InfoWindow({
+            content: `<div style="font-family: Inter, sans-serif; padding: 4px;"><strong style="font-weight: 500;">${hotelData.name}</strong><br><span style="font-size: 13px; color: #6B6B66;">${hotelData.address}</span></div>`
+        });
+
+        hotelMarker.addListener('click', function () {
+            infoWindow.open(map, hotelMarker);
+        });
+
+        map.setCenter({ lat: hotelData.lat, lng: hotelData.lng });
+        console.log('Hotel marker added:', hotelData.name);
+    }
+
+    function getCategoryColor(category) {
+        const colors = {
+            'Restaurants/Quick Bites': '#8B7355',
+            'Restaurants/Casual Dining': '#6B6B66',
+            'Restaurants/High-End': '#1A1A1A',
+            'Restaurants/Cafe': '#A0826D',
+            'Restaurants/Bakery': '#C9A882',
+            'Bars/Dive': '#4A4A45',
+            'Bars/Specialty Cocktails': '#2A2A2A',
+            'Bars/Wine': '#6B5B95',
+            'Bars/Brewery': '#8B7355',
+            'Attractions/Museums': '#556B8B',
+            'Attractions/Library': '#6B8B7C',
+            'Attractions/Park': '#7C8B6B',
+            'Shopping/Markets': '#D4A574',
+            'Shopping/Stores': '#9B8B7E'
+        };
+        return colors[category] || '#6B6B66';
+    }
+
+    function updateVenueMarkers() {
+        if (!map) return;
+
+        venueMarkers.forEach(marker => marker.setMap(null));
+        venueMarkers = [];
+
+        if (tripDays.length === 0) {
+            for (let category in venues) {
+                const categoryVenues = venues[category];
+                if (categoryVenues.length > 0) {
+                    categoryVenues.forEach(venue => {
+                        createVenueMarker(venue, venue.category, venue.rank.toString());
+                    });
+                }
+            }
+        } else {
+            let markerNum = 1;
+            tripDays.forEach(day => {
+                day.venues.forEach(venue => {
+                    createVenueMarker(venue, venue.category, markerNum.toString());
+                    markerNum++;
+                });
+            });
+        }
+
+        console.log('Venue markers updated:', venueMarkers.length);
+    }
+
+    function createVenueMarker(venue, category, label) {
+        const marker = new google.maps.Marker({
+            position: { lat: venue.lat, lng: venue.lng },
+            map: map,
+            title: venue.name,
+            label: {
+                text: label,
+                color: '#FFFFFF',
+                fontSize: '11px',
+                fontWeight: '500'
+            },
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 9,
+                fillColor: getCategoryColor(category),
+                fillOpacity: 1,
+                strokeColor: '#FFFFFF',
+                strokeWeight: 2
+            }
+        });
+
+        const walkingInfo = venue.walking ? `Walk: ${venue.walking.duration}` : '';
+        const drivingInfo = venue.driving ? `Drive: ${venue.driving.duration}` : '';
+        const timeInfo = venue.time ? `<strong>${formatTime(venue.time)}</strong><br>` : '';
+
+        const infoWindow = new google.maps.InfoWindow({
+            content: `<div style="font-family: Inter, sans-serif; padding: 4px;">${timeInfo}<strong style="font-weight: 500;">${venue.name}</strong><br><span style="font-size: 12px; color: #6B6B66;">${venue.address}<br>${walkingInfo} ${drivingInfo}</span></div>`
+        });
+
+        marker.addListener('click', function () {
+            infoWindow.open(map, marker);
+        });
+
+        venueMarkers.push(marker);
+    }
+
+    function initHotelSearch() {
+        const input = document.getElementById('hotel-search');
+        const autocomplete = new google.maps.places.Autocomplete(input, {
+            types: ['lodging'],
+            fields: ['name', 'formatted_address', 'geometry', 'place_id']
+        });
+
+        autocomplete.addListener('place_changed', function () {
+            const place = autocomplete.getPlace();
+            console.log('Place selected:', place);
+
+            if (!place.geometry || !place.geometry.location) {
+                alert('No location data for this place');
+                return;
+            }
+
+            hotelData = {
+                name: place.name,
+                address: place.formatted_address,
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+                placeId: place.place_id
+            };
+
+            console.log('Hotel data stored:', hotelData);
+            displayHotel();
+
+            if (tripDays.length > 0) {
+                displayDaysTimeline();
+            }
+        });
+    }
+
+    function initVenueSearch(centerLocation = null) {
+        const input = document.getElementById('venue-search');
+        const options = {
+            types: ['establishment'],
+            fields: ['name', 'formatted_address', 'geometry', 'place_id', 'types', 'rating', 'price_level', 'opening_hours']
+        };
+
+        if (centerLocation) {
+            const circle = new google.maps.Circle({
+                center: centerLocation,
+                radius: 9656
+            });
+            options.bounds = circle.getBounds();
+            options.strictBounds = false;
+            console.log('Venue search biased to 6 miles from hotel');
+        }
+
+        if (venueAutocomplete) {
+            google.maps.event.clearInstanceListeners(input);
+        }
+
+        venueAutocomplete = new google.maps.places.Autocomplete(input, options);
+
+        venueAutocomplete.addListener('place_changed', function () {
+            const place = venueAutocomplete.getPlace();
+            console.log('Venue selected:', place);
+
+            if (!place.geometry || !place.geometry.location) {
+                alert('No location data for this place');
+                return;
+            }
+
+            selectedVenue = {
+                name: place.name,
+                address: place.formatted_address,
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+                placeId: place.place_id,
+                types: place.types || [],
+                rating: place.rating || null,
+                priceLevel: place.price_level || null,
+                openingHours: place.opening_hours || null
+            };
+
+            console.log('Selected venue stored:', selectedVenue);
+            suggestCategory(place.types);
+        });
+    }
+
+    function suggestCategory(types) {
+        const categorySelect = document.getElementById('category-select');
+
+        if (types.includes('bar') || types.includes('night_club')) {
+            if (types.includes('liquor_store') || types.includes('store')) {
+                categorySelect.value = 'Bars/Wine';
+            } else {
+                categorySelect.value = 'Bars/Specialty Cocktails';
+            }
+        } else if (types.includes('bakery')) {
+            categorySelect.value = 'Restaurants/Bakery';
+        } else if (types.includes('cafe')) {
+            categorySelect.value = 'Restaurants/Cafe';
+        } else if (types.includes('restaurant')) {
+            if (types.includes('meal_takeaway') || types.includes('meal_delivery')) {
+                categorySelect.value = 'Restaurants/Quick Bites';
+            } else {
+                categorySelect.value = 'Restaurants/Casual Dining';
+            }
+        } else if (types.includes('museum') || types.includes('art_gallery')) {
+            categorySelect.value = 'Attractions/Museums';
+        } else if (types.includes('library')) {
+            categorySelect.value = 'Attractions/Library';
+        } else if (types.includes('park') || types.includes('campground')) {
+            categorySelect.value = 'Attractions/Park';
+        }
+
+        console.log('Auto-suggested category:', categorySelect.value);
+    }
+
+    async function addVenueToList() {
+        const categorySelect = document.getElementById('category-select');
+        const daySelect = document.getElementById('day-select');
+        const category = categorySelect.value;
+        const selectedDay = daySelect.value;
+
+        if (!selectedVenue) {
+            alert('Please search for and select a venue first');
+            return;
+        }
+
+        if (!category) {
+            alert('Please select a category');
+            return;
+        }
+
+        if (tripDays.length > 0 && !selectedDay) {
+            alert('Please select which day to add this venue to');
+            return;
+        }
+
+        const btn = document.getElementById('add-venue-btn');
+        const originalText = btn.textContent;
+        btn.textContent = 'Calculating...';
+        btn.disabled = true;
+
+        try {
+            const distances = await calculateDistances(selectedVenue);
+            const duration = getDefaultDuration(category);
+
+            const venueWithData = {
+                ...selectedVenue,
+                category: category,
+                time: document.getElementById('venue-time').value || null,
+                duration: duration,
+                walking: distances ? distances.walking : null,
+                driving: distances ? distances.driving : null
+            };
+
+            if (tripDays.length > 0) {
+                const day = tripDays.find(d => d.dayNumber === parseInt(selectedDay));
+                if (day) {
+                    day.venues.push(venueWithData);
+                    console.log('Added to day', selectedDay, venueWithData);
+                }
+            } else {
+                const rank = venues[category].length + 1;
+                venueWithData.rank = rank;
+                venues[category].push(venueWithData);
+                console.log('Added to category', category, venueWithData);
+            }
+
+            document.getElementById('venue-search').value = '';
+            categorySelect.value = '';
+            daySelect.value = '';
+            document.getElementById('venue-time').value = '';
+            selectedVenue = null;
+
+            if (tripDays.length > 0) {
+                displayDaysTimeline();
+            } else {
+                displayVenueList();
+            }
+
+        } catch (error) {
+            console.error('Error calculating distances:', error);
+            alert('Could not calculate distances. Adding venue anyway.');
+
+            const venueWithData = {
+                ...selectedVenue,
+                category: category,
+                duration: getDefaultDuration(category),
+                walking: null,
+                driving: null
+            };
+
+            if (tripDays.length > 0) {
+                const day = tripDays.find(d => d.dayNumber === parseInt(selectedDay));
+                if (day) day.venues.push(venueWithData);
+                displayDaysTimeline();
+            } else {
+                const rank = venues[category].length + 1;
+                venueWithData.rank = rank;
+                venues[category].push(venueWithData);
+                displayVenueList();
+            }
+        } finally {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    function displayVenueList() {
+        const listDisplay = document.getElementById('list-display');
+        document.getElementById('filter-buttons').style.display = 'block';
+
+        let html = '';
+        let venueCount = 0;
+
+        for (let category in venues) {
+            const categoryVenues = venues[category];
+            let shouldShow = false;
+
+            if (currentFilter === 'all') {
+                shouldShow = categoryVenues.length > 0;
+            } else if (currentFilter === 'restaurants') {
+                shouldShow = category.startsWith('Restaurants/') && categoryVenues.length > 0;
+            } else if (currentFilter === 'bars') {
+                shouldShow = category.startsWith('Bars/') && categoryVenues.length > 0;
+            } else {
+                shouldShow = category === currentFilter && categoryVenues.length > 0;
+            }
+
+            if (shouldShow) {
+                categoryVenues.forEach(venue => {
+                    const priceLevel = venue.priceLevel ? '•'.repeat(venue.priceLevel) : '';
+                    const rating = venue.rating ? `${venue.rating}` : '';
+                    const walkingInfo = venue.walking ? `Walk ${venue.walking.duration}` : '';
+                    const drivingInfo = venue.driving ? `Drive ${venue.driving.duration}` : '';
+
+                    html += `
+                        <div class="venue-item">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <div class="venue-name">${venue.name}</div>
+                                    <div class="venue-details">
+                                        ${venue.address}<br>
+                                        ${rating} ${priceLevel}<br>
+                                        ${walkingInfo} ${drivingInfo}
+                                    </div>
+                                </div>
+                                <button onclick="deleteVenue('${category}', ${categoryVenues.indexOf(venue)})" class="btn-delete">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    venueCount++;
+                });
+            }
+        }
+
+        if (venueCount === 0) {
+            html = '<p style="color: #6B6B66; text-align: center; padding: 40px 0;">No venues added yet</p>';
+        }
+
+        listDisplay.innerHTML = html;
+        updateVenueMarkers();
+    }
+
+    async function calculateDistances(venue) {
+        if (!hotelData) {
+            console.log('No hotel set - skipping distance calculation');
+            return Promise.resolve(null);
+        }
+
+        try {
+            const walkingResponse = await fetch('/api/distance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    origins: `${hotelData.lat},${hotelData.lng}`,
+                    destinations: `${venue.lat},${venue.lng}`,
+                    mode: 'walking'
+                })
+            });
+            const walkingData = await walkingResponse.json();
+
+            const drivingResponse = await fetch('/api/distance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    origins: `${hotelData.lat},${hotelData.lng}`,
+                    destinations: `${venue.lat},${venue.lng}`,
+                    mode: 'driving'
+                })
+            });
+            const drivingData = await drivingResponse.json();
+
+            if (walkingData.status === 'OK' && drivingData.status === 'OK') {
+                const walkingResult = walkingData.rows[0].elements[0];
+                const drivingResult = drivingData.rows[0].elements[0];
+
+                return {
+                    walking: {
+                        distance: walkingResult.distance.text,
+                        duration: walkingResult.duration.text
+                    },
+                    driving: {
+                        distance: drivingResult.distance.text,
+                        duration: drivingResult.duration.text
+                    }
+                };
+            } else {
+                throw new Error('Distance API returned error');
+            }
+        } catch (error) {
+            console.error('Distance calculation failed:', error);
+            return null;
+        }
+    }
+
+    async function calculateVenueToVenueDistance(fromVenue, toVenue) {
+        try {
+            const walkingResponse = await fetch('/api/distance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    origins: `${fromVenue.lat},${fromVenue.lng}`,
+                    destinations: `${toVenue.lat},${toVenue.lng}`,
+                    mode: 'walking'
+                })
+            });
+            const walkingData = await walkingResponse.json();
+
+            const drivingResponse = await fetch('/api/distance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    origins: `${fromVenue.lat},${fromVenue.lng}`,
+                    destinations: `${toVenue.lat},${toVenue.lng}`,
+                    mode: 'driving'
+                })
+            });
+            const drivingData = await drivingResponse.json();
+
+            if (walkingData.status === 'OK' && drivingData.status === 'OK') {
+                const walkingResult = walkingData.rows[0].elements[0];
+                const drivingResult = drivingData.rows[0].elements[0];
+
+                return {
+                    walking: walkingResult.status === 'OK' ? {
+                        distance: walkingResult.distance.text,
+                        duration: walkingResult.duration.text,
+                        durationMinutes: Math.round(walkingResult.duration.value / 60)
+                    } : null,
+                    driving: drivingResult.status === 'OK' ? {
+                        distance: drivingResult.distance.text,
+                        duration: drivingResult.duration.text,
+                        durationMinutes: Math.round(drivingResult.duration.value / 60)
+                    } : null
+                };
+            }
+        } catch (error) {
+            console.error('Venue-to-venue distance failed:', error);
+            return { walking: null, driving: null };
+        }
+    }
+
+    async function fetchWeatherForTrip() {
+        if (!hotelData || tripDays.length === 0) return;
+
+        try {
+            const response = await fetch('/api/weather', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lat: hotelData.lat,
+                    lon: hotelData.lng
+                })
+            });
+            const data = await response.json();
+
+            const forecastsByDate = {};
+            data.list.forEach(forecast => {
+                const date = forecast.dt_txt.split(' ')[0];
+                if (!forecastsByDate[date]) {
+                    forecastsByDate[date] = [];
+                }
+                forecastsByDate[date].push(forecast);
+            });
+
+            tripDays.forEach(day => {
+                const weatherContainer = document.getElementById(`weather-day-${day.dayNumber}`);
+                if (!weatherContainer) return;
+
+                const dayForecasts = forecastsByDate[day.date];
+                if (!dayForecasts || dayForecasts.length === 0) {
+                    weatherContainer.innerHTML = '<span style="color: #9B9B96;">No forecast</span>';
+                    return;
+                }
+
+                const temps = dayForecasts.map(f => f.main.temp);
+                const high = Math.round(Math.max(...temps));
+                const low = Math.round(Math.min(...temps));
+
+                const middayForecast = dayForecasts[Math.floor(dayForecasts.length / 2)];
+                const condition = middayForecast.weather[0].main;
+                const icon = middayForecast.weather[0].icon;
+
+                weatherContainer.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <img src="https://openweathermap.org/img/wn/${icon}.png" 
+                             style="width: 32px; height: 32px; margin: -4px 0;" 
+                             alt="${condition}">
+                        <div>
+                            <div style="font-weight: 400; color: #1A1A1A;">${high}°F / ${low}°F</div>
+                            <div style="font-size: 11px; color: #6B6B66; text-transform: capitalize;">${condition}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            console.log('Weather data loaded successfully');
+
+        } catch (error) {
+            console.error('Weather fetch failed:', error);
+            tripDays.forEach(day => {
+                const weatherContainer = document.getElementById(`weather-day-${day.dayNumber}`);
+                if (weatherContainer) {
+                    weatherContainer.innerHTML = '<span style="color: #9B9B96;">Weather unavailable</span>';
+                }
+            });
+        }
+    }
+
+    function setupFilterButtons() {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                console.log('Filter changed to:', currentFilter);
+                displayVenueList();
+            });
+        });
+    }
+
+    function displayHotel() {
+        const display = document.getElementById('hotel-display');
+        display.innerHTML = `<strong style="font-weight: 500;">${hotelData.name}</strong><br>${hotelData.address}`;
+        updateHotelMarker();
+        const hotelLocation = new google.maps.LatLng(hotelData.lat, hotelData.lng);
+        initVenueSearch(hotelLocation);
+        console.log('Venue search now biased toward hotel location');
+    }
+
+    function saveTrip() {
+        const tripName = document.getElementById('trip-name').value.trim();
+        if (!tripName) {
+            alert('Please enter a trip name');
+            return;
+        }
+
+        const tripData = {
+            name: tripName,
+            hotel: hotelData,
+            venues: venues,
+            tripDays: tripDays,
+            savedAt: new Date().toISOString()
+        };
+
+        let savedTrips = JSON.parse(localStorage.getItem('tripPlanner_trips') || '{}');
+        savedTrips[tripName] = tripData;
+        localStorage.setItem('tripPlanner_trips', JSON.stringify(savedTrips));
+        alert(`Trip saved successfully`);
+        displaySavedTrips();
+    }
+
+    function loadTrip(tripName) {
+        const savedTrips = JSON.parse(localStorage.getItem('tripPlanner_trips') || '{}');
+        const tripData = savedTrips[tripName];
+
+        if (!tripData) {
+            alert('Trip not found');
+            return;
+        }
+
+        document.getElementById('trip-name').value = tripData.name;
+        hotelData = tripData.hotel;
+        venues = tripData.venues;
+        tripDays = tripData.tripDays || [];
+
+        if (hotelData) {
+            displayHotel();
+        }
+
+        if (tripDays.length > 0) {
+            displayDaysTimeline();
+            updateDayDropdown();
+        } else {
+            displayVenueList();
+        }
+
+        alert(`Trip loaded successfully`);
+    }
+
+    function newTrip() {
+        if (confirm('Start a new trip? Current unsaved changes will be lost.')) {
+            document.getElementById('trip-name').value = '';
+            hotelData = null;
+            tripDays = [];
+            venues = {
+                "Restaurants/Quick Bites": [],
+                "Restaurants/Casual Dining": [],
+                "Restaurants/High-End": [],
+                "Restaurants/Cafe": [],
+                "Restaurants/Bakery": [],
+                "Bars/Dive": [],
+                "Bars/Specialty Cocktails": [],
+                "Bars/Wine": [],
+                "Bars/Brewery": [],
+                "Attractions/Museums": [],
+                "Attractions/Library": [],
+                "Attractions/Park": [],
+                "Shopping/Markets": [],
+                "Shopping/Stores": []
+            };
+
+            document.getElementById('hotel-display').innerHTML = '';
+            document.getElementById('list-display').innerHTML = '';
+
+            if (hotelMarker) {
+                hotelMarker.setMap(null);
+                hotelMarker = null;
+            }
+
+            venueMarkers.forEach(marker => marker.setMap(null));
+            venueMarkers = [];
+        }
+    }
+
+    function displaySavedTrips() {
+        const savedTrips = JSON.parse(localStorage.getItem('tripPlanner_trips') || '{}');
+        const tripsList = document.getElementById('saved-trips-list');
+        const tripNames = Object.keys(savedTrips);
+
+        if (tripNames.length === 0) {
+            tripsList.innerHTML = '';
+            return;
+        }
+
+        let html = '<div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #F0F0ED;"><div style="font-size: 12px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; color: #6B6B66; margin-bottom: 12px;">Saved Trips</div>';
+        tripNames.forEach(name => {
+            const trip = savedTrips[name];
+            const date = new Date(trip.savedAt).toLocaleDateString();
+            html += `<div style="margin: 8px 0; display: flex; justify-content: space-between; align-items: center; padding: 8px 0;"><span style="cursor: pointer; color: #1A1A1A; font-size: 14px;" onclick="loadTrip('${name}')">${name}</span><div><span style="font-size: 12px; color: #9B9B96; margin-right: 12px;">${date}</span><button onclick="deleteTrip('${name}')" class="btn-delete" style="padding: 4px 12px;">Delete</button></div></div>`;
+        });
+        html += '</div>';
+        tripsList.innerHTML = html;
+    }
+
+    function deleteTrip(tripName) {
+        if (confirm(`Delete "${tripName}"?`)) {
+            let savedTrips = JSON.parse(localStorage.getItem('tripPlanner_trips') || '{}');
+            delete savedTrips[tripName];
+            localStorage.setItem('tripPlanner_trips', JSON.stringify(savedTrips));
+            displaySavedTrips();
+        }
+    }
+
+    function printTrip() {
+        const mapSection = document.querySelector('.section:has(#map)');
+        const printMapToggle = document.getElementById('print-map-toggle');
+
+        if (!printMapToggle.checked) {
+            mapSection.style.display = 'none';
+        } else {
+            mapSection.style.display = 'block';
+        }
+
+        window.print();
+        mapSection.style.display = 'block';
+    }
+
+    function copyTripAsText() {
+        const tripName = document.getElementById('trip-name').value || 'My Trip';
+
+        if (!hotelData || tripDays.length === 0) {
+            alert('Please select a hotel and generate trip days first');
+            return;
+        }
+
+        let text = `${tripName.toUpperCase()}\n`;
+        text += `${'='.repeat(tripName.length)}\n\n`;
+
+        text += `📍 HOTEL\n`;
+        text += `${hotelData.name}\n`;
+        text += `${hotelData.address}\n\n`;
+
+        if (tripDays.length > 0) {
+            text += `📅 ${tripDays[0].displayDate} - ${tripDays[tripDays.length - 1].displayDate}\n\n`;
+        }
+
+        text += `${'='.repeat(50)}\n\n`;
+
+        tripDays.forEach(day => {
+            text += `DAY ${day.dayNumber} — ${day.displayDate.toUpperCase()}\n`;
+            text += `${'-'.repeat(50)}\n\n`;
+
+            const sortedVenues = [...day.venues].sort((a, b) => {
+                if (!a.time) return 1;
+                if (!b.time) return -1;
+                return a.time.localeCompare(b.time);
+            });
+
+            if (sortedVenues.length === 0) {
+                text += `No venues scheduled\n\n`;
+            } else {
+                sortedVenues.forEach((venue, idx) => {
+                    if (venue.time) {
+                        text += `⏰ ${formatTime(venue.time)}\n`;
+                    }
+                    text += `${venue.name}\n`;
+                    text += `${venue.address}\n`;
+
+                    if (venue.rating || venue.priceLevel) {
+                        text += `${venue.rating ? `⭐ ${venue.rating}` : ''} ${venue.priceLevel ? '💲'.repeat(venue.priceLevel) : ''}\n`;
+                    }
+
+                    if (venue.walking || venue.driving) {
+                        text += `🏨→ ${venue.walking ? `Walk ${venue.walking.duration}` : ''} ${venue.driving ? `Drive ${venue.driving.duration}` : ''}\n`;
+                    }
+
+                    text += `\n`;
+                });
+            }
+
+            text += `\n`;
+        });
+
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Trip copied to clipboard! 📋\nPaste it anywhere.');
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            alert('Copy failed. Please try again.');
+        });
+    }
+
+    function saveTripAsPDF() {
+        const tripName = document.getElementById('trip-name').value || 'My Trip';
+
+        if (!hotelData || tripDays.length === 0) {
+            alert('Please select a hotel and generate trip days first');
+            return;
+        }
+
+        const proceed = confirm(
+            `PDF Export Instructions:\n\n` +
+            `1. Click OK\n` +
+            `2. In the print dialog, select "Save as PDF" as the destination\n` +
+            `3. Click Save\n\n` +
+            `Ready to continue?`
+        );
+
+        if (proceed) {
+            const originalTitle = document.title;
+            document.title = tripName.replace(/[^a-z0-9]/gi, '_');
+
+            printTrip();
+
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+        }
+    }
+
+    function generateDays() {
+        const startDate = document.getElementById('trip-start-date').value;
+        const endDate = document.getElementById('trip-end-date').value;
+
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates');
+            return;
+        }
+
+        if (new Date(startDate) > new Date(endDate)) {
+            alert('End date must be after start date');
+            return;
+        }
+
+        tripStartDate = startDate;
+        tripEndDate = endDate;
+        generateDaysFromDates(startDate, endDate);
+        alert(`Generated ${tripDays.length} days`);
+        displayDaysTimeline();
+        updateDayDropdown();
+    }
+
+    function formatTime(time24) {
+        if (!time24) return '';
+        const [hours, minutes] = time24.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12;
+        return `${hour12}:${minutes} ${ampm}`;
+    }
+
+    function getDefaultDuration(category) {
+        const durations = {
+            'Restaurants/Quick Bites': 30,
+            'Restaurants/Casual Dining': 90,
+            'Restaurants/High-End': 120,
+            'Restaurants/Cafe': 45,
+            'Restaurants/Bakery': 20,
+            'Bars/Dive': 90,
+            'Bars/Specialty Cocktails': 90,
+            'Bars/Wine': 90,
+            'Bars/Brewery': 90,
+            'Attractions/Museums': 120,
+            'Attractions/Library': 60,
+            'Attractions/Park': 90,
+            'Shopping/Markets': 60,
+            'Shopping/Stores': 60
+        };
+        return durations[category] || 60;
+    }
+
+    function formatDuration(minutes) {
+        if (!minutes || isNaN(minutes)) return '1h';
+        if (minutes < 60) return `${minutes} min`;
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+    }
+
+    function convertTo24Hour(time12h) {
+        const [time, modifier] = time12h.trim().split(/\s+/);
+        let [hours, minutes] = time.split(':');
+        hours = parseInt(hours);
+
+        if (modifier.toUpperCase() === 'PM' && hours !== 12) {
+            hours += 12;
+        }
+        if (modifier.toUpperCase() === 'AM' && hours === 12) {
+            hours = 0;
+        }
+
+        return `${String(hours).padStart(2, '0')}:${minutes}`;
+    }
+
+    function isVenueOpenAtTime(venue, tripDate, timeString) {
+        if (!venue.openingHours || !venue.openingHours.weekday_text || !timeString) {
+            return { isOpen: null, reason: 'Hours not available' };
+        }
+
+        const [year, month, day] = tripDate.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        const dayOfWeek = date.getDay();
+        const hoursIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const hoursText = venue.openingHours.weekday_text[hoursIndex];
+
+        if (hoursText.toLowerCase().includes('closed')) {
+            return { isOpen: false, reason: 'Closed' };
+        }
+
+        if (hoursText.toLowerCase().includes('open 24 hours')) {
+            return { isOpen: true, reason: 'Open 24 hours' };
+        }
+
+        const timeMatch = hoursText.match(/(\d{1,2}:\d{2}\s*[AP]M)\s*[–-]\s*(\d{1,2}:\d{2}\s*[AP]M)/i);
+        if (!timeMatch) {
+            return { isOpen: null, reason: 'Cannot parse hours' };
+        }
+
+        const openTime = convertTo24Hour(timeMatch[1]);
+        const closeTime = convertTo24Hour(timeMatch[2]);
+        const visitTime = timeString;
+
+        if (visitTime >= openTime && visitTime <= closeTime) {
+            return { isOpen: true, reason: 'Open' };
+        } else {
+            return { isOpen: false, reason: `Opens at ${timeMatch[1]}` };
+        }
+    }
+
+    function getOpenStatusBadge(venue, tripDate, timeString) {
+        try {
+            if (!venue.openingHours || !venue.openingHours.weekday_text) {
+                console.log(venue.name, '- No opening hours data available');
+                return '';
+            }
+
+            const [year, month, day] = tripDate.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            const dayOfWeek = date.getDay();
+            const hoursIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            const hoursText = venue.openingHours.weekday_text[hoursIndex];
+
+            console.log(venue.name, 'on', tripDate, '(day', dayOfWeek, ') -', hoursText);
+
+            const hoursCheck = isVenueOpenAtTime(venue, tripDate, timeString);
+
+            if (hoursCheck.isOpen === false) {
+                return `<span class="status-closed">${hoursCheck.reason}</span>`;
+            } else if (hoursCheck.isOpen === true) {
+                return `<span class="status-open">✓ Open</span>`;
+            }
+            return '';
+        } catch (error) {
+            console.error('Error checking hours:', error);
+            return '';
+        }
+    }
+
+    function checkScheduleConflict(currentVenue, nextVenue) {
+        if (!currentVenue.time || !nextVenue.time || !nextVenue.travelFromPrevious) {
+            return { hasConflict: false, type: null };
+        }
+
+        const [currentHour, currentMin] = currentVenue.time.split(':').map(Number);
+        const [nextHour, nextMin] = nextVenue.time.split(':').map(Number);
+
+        const currentTimeMinutes = currentHour * 60 + currentMin;
+        const nextTimeMinutes = nextHour * 60 + nextMin;
+
+        const timeDifference = nextTimeMinutes - currentTimeMinutes;
+
+        const travelTime = nextVenue.travelFromPrevious.driving
+            ? nextVenue.travelFromPrevious.driving.durationMinutes
+            : 0;
+
+        if (timeDifference < travelTime) {
+            return {
+                hasConflict: true,
+                type: 'impossible',
+                message: `Schedule conflict: Need ${travelTime} mins to travel, only have ${timeDifference} mins`
+            };
+        } else if (timeDifference < travelTime + 15) {
+            const buffer = timeDifference - travelTime;
+            return {
+                hasConflict: true,
+                type: 'tight',
+                message: `Tight schedule: ${buffer} min buffer after ${travelTime} min travel`
+            };
+        }
+
+        return { hasConflict: false, type: null };
+    }
+
+    async function displayDaysTimeline() {
+        const listDisplay = document.getElementById('list-display');
+        document.getElementById('filter-buttons').style.display = 'none';
+
+        if (tripDays.length === 0) {
+            listDisplay.innerHTML = '<p style="color: #6B6B66; text-align: center; padding: 40px 0;">Generate days to start planning</p>';
+            return;
+        }
+
+        for (let day of tripDays) {
+            if (day.venues.length > 1) {
+                const sortedVenues = [...day.venues].sort((a, b) => {
+                    if (!a.time) return 1;
+                    if (!b.time) return -1;
+                    return a.time.localeCompare(b.time);
+                });
+
+                for (let i = 1; i < sortedVenues.length; i++) {
+                    const prevVenue = sortedVenues[i - 1];
+                    const currentVenue = sortedVenues[i];
+                    const travel = await calculateVenueToVenueDistance(prevVenue, currentVenue);
+                    currentVenue.travelFromPrevious = travel;
+                }
+
+                if (sortedVenues.length > 0) {
+                    sortedVenues[0].travelFromPrevious = null;
+                }
+            }
+
+            day.venues.forEach(venue => {
+                if (!venue.duration) {
+                    venue.duration = getDefaultDuration(venue.category);
+                }
+            });
+        }
+
+        let html = '';
+        tripDays.forEach(day => {
+            html += renderDayCard(day);
+        });
+
+        listDisplay.innerHTML = html;
+        updateVenueMarkers();
+
+        if (hotelData) {
+            fetchWeatherForTrip();
+        }
+    }
+
+    function renderDayCard(day) {
+        const sortedVenues = [...day.venues].sort((a, b) => {
+            if (!a.time) return 1;
+            if (!b.time) return -1;
+            return a.time.localeCompare(b.time);
+        });
+
+        return `
+<div class="day-card">
+    <div onclick="toggleDayCollapse(${day.dayNumber})" style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px; cursor: pointer; user-select: none;">
+        <h3 style="margin: 0;">
+            <span id="day-${day.dayNumber}-arrow" style="display: inline-block; width: 20px;">${collapsedDays.has(day.dayNumber) ? '▶' : '▼'}</span>
+            Day ${day.dayNumber} — ${day.displayDate}
+        </h3>
+        <div id="weather-day-${day.dayNumber}" style="text-align: right; color: #6B6B66; font-size: 13px;">
+            <em>Loading weather...</em>
+        </div>
+    </div>
+<div id="day-${day.dayNumber}-venues" style="${collapsedDays.has(day.dayNumber) ? 'display: none;' : ''}">
+    ${sortedVenues.length === 0 ? '<p style="color: #9B9B96; font-size: 14px;">No venues scheduled</p>' : ''}
+    
+    ${sortedVenues.length > 0 ? renderTimeline(day, sortedVenues) : ''}
+    
+    ${sortedVenues.length > 0 ? `<div style="margin-top: 40px; padding-top: 24px; border-top: 2px solid #F0F0ED;"><h4 style="font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; color: #6B6B66; margin-bottom: 20px;">📍 Venue Details</h4></div>` : ''}
+    ${sortedVenues.map((v, idx) => renderVenueListItem(v, day, idx)).join('')}
+</div>
+</div>`;
+        }
+    function renderTimeline(day, sortedVenues) {
+        const venuesWithTime = sortedVenues.filter(v => v.time);
+        if (venuesWithTime.length === 0) return '';
+
+        let html = `
+<div style="margin: 0 0 48px 0; padding: 32px; background: linear-gradient(135deg, #F5F5F3 0%, #FAFAF8 100%); border: 1px solid #E8E8E5; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+    <div style="display: flex; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #E8E8E5;">
+        <h4 style="font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; color: #6B6B66; margin: 0;">📅 Timeline</h4>
+    </div>
+<div style="display: flex; gap: 12px; overflow-x: auto; padding: 16px 0;">
+`;
+        sortedVenues.forEach((venue, idx) => {
+            if (!venue.time) return;
+
+            const color = getCategoryColor(venue.category);
+            const nextVenue = sortedVenues[idx + 1];
+
+            html += `
+    <div style="flex-shrink: 0; width: 200px;">
+        <div style="background: ${color}; color: #FFFFFF; padding: 16px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: 100%;">
+            <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">${formatTime(venue.time)}</div>
+            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px; line-height: 1.3;">${venue.name}</div>
+            <div style="font-size: 10px; opacity: 0.8; padding: 4px 8px; background: rgba(255,255,255,0.2); border-radius: 2px; display: inline-block;">${formatDuration(venue.duration)}</div>
+        </div>
+    </div>`;
+
+            if (nextVenue && nextVenue.time && nextVenue.travelFromPrevious) {
+                const drivingTime = nextVenue.travelFromPrevious?.driving?.duration || 'N/A';
+                html += `
+    <div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 8px;">
+        <div style="font-size: 20px; color: #D4D4D0;">→</div>
+        <div style="font-size: 9px; color: #9B9B96; text-align: center; margin-top: 4px;">🚗 ${drivingTime}</div>
+    </div>`;
+            }
+        });
+
+        html += `
+</div>
+</div>`;
+        return html;
+    }
+
+    function renderVenueListItem(v, day, idx) {
+        const actualIdx = day.venues.indexOf(v);
+        const isFirst = idx === 0;
+        const sortedVenues = [...day.venues].sort((a, b) => {
+            if (!a.time) return 1;
+            if (!b.time) return -1;
+            return a.time.localeCompare(b.time);
+        });
+
+        let travelInfo = '';
+        if (!isFirst && v.travelFromPrevious) {
+            const t = v.travelFromPrevious;
+            const driveInfo = t.driving ? `Drive ${t.driving.duration}` : '';
+
+            const prevVenue = sortedVenues[idx - 1];
+            const conflict = checkScheduleConflict(prevVenue, v);
+
+            let conflictWarning = '';
+            if (conflict.hasConflict) {
+                if (conflict.type === 'impossible') {
+                    conflictWarning = `<div class="conflict-error">${conflict.message}</div>`;
+                } else if (conflict.type === 'tight') {
+                    conflictWarning = `<div class="conflict-warning">${conflict.message}</div>`;
+                }
+            }
+
+            travelInfo = `<div class="travel-info">🚗 ${driveInfo}${conflictWarning}</div>`;
+        }
+
+        return `
+${travelInfo}
+<div class="venue-item">
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div style="flex: 1;">
+            ${v.time ? `<span class="time-badge">${formatTime(v.time)} • ${formatDuration(v.duration)}</span>${getOpenStatusBadge(v, day.date, v.time)}<br>` : ''}
+            <div class="venue-name">${v.name}<span class="category-badge">${v.category.split('/')[1]}</span></div>
+            <div class="venue-details">
+                ${v.address}<br>
+                ${v.rating ? `${v.rating}` : ''} ${v.priceLevel ? '•'.repeat(v.priceLevel) : ''}<br>
+                ${v.driving ? `<strong>From hotel:</strong> Drive ${v.driving.duration}` : ''}
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button onclick="editVenueDuration(${day.dayNumber}, ${actualIdx})" class="btn-edit">Edit Duration</button>
+            <button onclick="editVenueCategory(${day.dayNumber}, ${actualIdx})" class="btn-edit">Edit Category</button>
+            <button onclick="editVenueTime(${day.dayNumber}, ${actualIdx})" class="btn-edit">Edit Time</button>
+            <button onclick="deleteVenueFromDay(${day.dayNumber}, ${actualIdx})" class="btn-delete">Delete</button>
+        </div>
+    </div>
+</div>`;
+        }
+    function editVenueTime(dayNumber, venueIndex) {
+        const day = tripDays.find(d => d.dayNumber === dayNumber);
+        if (!day) return;
+
+        const venue = day.venues[venueIndex];
+        const newTime = prompt('Enter time (HH:MM in 24-hour format):\nExample: 09:00 or 14:30', venue.time || '12:00');
+
+        if (newTime !== null && newTime.trim() !== '') {
+            const trimmed = newTime.trim();
+
+            if (!/^\d{1,2}:\d{2}$/.test(trimmed)) {
+                alert('Invalid format! Use HH:MM (e.g., 09:00 or 14:30)');
+                return;
+            }
+
+            const [hours, mins] = trimmed.split(':');
+            venue.time = `${hours.padStart(2, '0')}:${mins}`;
+
+            day.venues.sort((a, b) => {
+                if (!a.time) return 1;
+                if (!b.time) return -1;
+                return a.time.localeCompare(b.time);
+            });
+
+            displayDaysTimeline();
+        }
+    }
+
+    function editVenueDuration(dayNumber, venueIndex) {
+        const day = tripDays.find(d => d.dayNumber === dayNumber);
+        if (!day) return;
+
+        const venue = day.venues[venueIndex];
+        const currentDuration = venue.duration || 60;
+
+        const newDuration = prompt(
+            'Enter duration in minutes:\n\nSuggested durations:\n• Quick meal: 30 min\n• Casual dining: 90 min\n• Fine dining: 120 min\n• Museum: 120 min\n• Bar: 90 min',
+            currentDuration
+        );
+
+        if (newDuration !== null && newDuration.trim() !== '') {
+            const duration = parseInt(newDuration);
+            if (duration > 0 && duration <= 480) {
+                venue.duration = duration;
+                displayDaysTimeline();
+            } else {
+                alert('Duration must be between 1 and 480 minutes (8 hours)');
+            }
+        }
+    }
+
+    function editVenueCategory(dayNumber, venueIndex) {
+        const day = tripDays.find(d => d.dayNumber === dayNumber);
+        if (!day) return;
+
+        const venue = day.venues[venueIndex];
+
+        const categories = [
+            "Restaurants/Quick Bites",
+            "Restaurants/Casual Dining",
+            "Restaurants/High-End",
+            "Restaurants/Cafe",
+            "Restaurants/Bakery",
+            "Bars/Dive",
+            "Bars/Specialty Cocktails",
+            "Bars/Wine",
+            "Bars/Brewery",
+            "Attractions/Museums",
+            "Attractions/Library",
+            "Attractions/Park",
+            "Shopping/Markets",
+            "Shopping/Stores"
+        ];
+
+        let options = "Choose new category:\n\n";
+        categories.forEach((cat, idx) => {
+            options += `${idx + 1}. ${cat.split('/')[1]}\n`;
+        });
+
+        const choice = prompt(options + "\nEnter number (1-" + categories.length + "):");
+
+        if (choice !== null) {
+            const index = parseInt(choice) - 1;
+            if (index >= 0 && index < categories.length) {
+                venue.category = categories[index];
+                displayDaysTimeline();
+                console.log('Updated category for', venue.name, 'to', venue.category);
+            } else {
+                alert('Invalid choice');
+            }
+        }
+    }
+
+    function deleteVenue(category, venueIndex) {
+        if (confirm('Delete this venue?')) {
+            venues[category].splice(venueIndex, 1);
+            venues[category].forEach((venue, idx) => {
+                venue.rank = idx + 1;
+            });
+            displayVenueList();
+            console.log('Venue deleted from', category);
+        }
+    }
+
+    function deleteVenueFromDay(dayNumber, venueIndex) {
+        if (confirm('Delete this venue?')) {
+            const day = tripDays.find(d => d.dayNumber === dayNumber);
+            if (day) {
+                day.venues.splice(venueIndex, 1);
+                displayDaysTimeline();
+                console.log('Venue deleted from day', dayNumber);
+            }
+        }
+    }
+
+    function updateDayDropdown() {
+        const daySelect = document.getElementById('day-select');
+
+        if (tripDays.length === 0) {
+            daySelect.innerHTML = '<option value="">Generate days first</option>';
+            daySelect.disabled = true;
+            return;
+        }
+
+        daySelect.disabled = false;
+        daySelect.innerHTML = '<option value="">Select Day</option>';
+
+        tripDays.forEach(day => {
+            const option = document.createElement('option');
+            option.value = day.dayNumber;
+            option.textContent = `Day ${day.dayNumber} — ${day.displayDate}`;
+            daySelect.appendChild(option);
+        });
+    }
+
+    function toggleDayCollapse(dayNumber) {
+        if (collapsedDays.has(dayNumber)) {
+            collapsedDays.delete(dayNumber);
+        } else {
+            collapsedDays.add(dayNumber);
+        }
+
+        const venuesContainer = document.getElementById(`day-${dayNumber}-venues`);
+        const arrow = document.getElementById(`day-${dayNumber}-arrow`);
+
+        if (venuesContainer && arrow) {
+            if (collapsedDays.has(dayNumber)) {
+                venuesContainer.style.display = 'none';
+                arrow.textContent = '▶';
+            } else {
+                venuesContainer.style.display = 'block';
+                arrow.textContent = '▼';
+            }
+        }
+    }
+
+    function toggleVenueForm() {
+        const form = document.getElementById('venue-form');
+        const btn = document.getElementById('venue-toggle-btn');
+
+        if (form.style.display === 'none') {
+            form.style.display = 'block';
+            btn.textContent = 'Hide ▲';
+        } else {
+            form.style.display = 'none';
+            btn.textContent = 'Show ▼';
+        }
+    }
+</script>
+
+<script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8JmsDj85EQ73OlWokJIr85KXcNvEdzeY&libraries=places&callback=initMap"
+    async defer></script>
+</body>
+</html>
+</parameter>
