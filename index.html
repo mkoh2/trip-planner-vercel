@@ -1389,6 +1389,7 @@
                     category: category,
                     time: document.getElementById('venue-time').value || null,
                     duration: duration,
+                    legTravelMode: 'driving',
                     walking: distances ? distances.walking : null,
                     driving: distances ? distances.driving : null
                 };
@@ -1534,6 +1535,7 @@
                 if (walkingData.status === 'OK' && drivingData.status === 'OK') {
                     const walkingResult = walkingData.rows[0].elements[0];
                     const drivingResult = drivingData.rows[0].elements[0];
+                    const transitResult = transitData.rows[0].elements[0];
 
                     return {
                         walking: {
@@ -1578,6 +1580,21 @@
                 });
                 const drivingData = await drivingResponse.json();
 
+                const transitResponse = await fetch('/api/distance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        origins: `${fromVenue.lat},${fromVenue.lng}`,
+                        destinations: `${toVenue.lat},${toVenue.lng}`,
+                        mode: 'transit'
+                    })
+                });
+                const transitData = await transitResponse.json();
+
+                console.log('walking status:', walkingData.status);
+                console.log('driving status:', drivingData.status);
+                console.log('transit data:', transitData);
+
                 if (walkingData.status === 'OK' && drivingData.status === 'OK') {
                     const walkingResult = walkingData.rows[0].elements[0];
                     const drivingResult = drivingData.rows[0].elements[0];
@@ -1592,12 +1609,17 @@
                             distance: drivingResult.distance.text,
                             duration: drivingResult.duration.text,
                             durationMinutes: Math.round(drivingResult.duration.value / 60)
+                        } : null,
+                        transit: transitResult.status === 'OK' ? {
+                            distance: transitResult.distance.text,
+                            duration: transitResult.duration.text,
+                            durationMinutes: Math.round(transitResult.duration.value / 60)
                         } : null
                     };
                 }
             } catch (error) {
                 console.error('Venue-to-venue distance failed:', error);
-                return { walking: null, driving: null };
+                return { walking: null, driving: null, transit: null };
             }
         }
 
@@ -2088,9 +2110,8 @@
 
             const timeDifference = nextTimeMinutes - currentTimeMinutes;
 
-            const travelTime = nextVenue.travelFromPrevious.driving
-                ? nextVenue.travelFromPrevious.driving.durationMinutes
-                : 0;
+            const mode = nextVenue.legTravelMode || 'driving';
+            const travelTime = nextVenue.travelFromPrevious[mode]?.durationMinutes || 0;
 
             if (timeDifference < travelTime) {
                 return {
@@ -2131,6 +2152,7 @@
                         const prevVenue = sortedVenues[i - 1];
                         const currentVenue = sortedVenues[i];
                         const travel = await calculateVenueToVenueDistance(prevVenue, currentVenue);
+                        console.log('travelFromPrevious:', travel);
                         currentVenue.travelFromPrevious = travel;
                     }
 
@@ -2241,21 +2263,42 @@
             let travelInfo = '';
             if (!isFirst && v.travelFromPrevious) {
                 const t = v.travelFromPrevious;
-                const driveInfo = t.driving ? `Drive ${t.driving.duration}` : '';
+                const mode = v.legTravelMode || 'driving';
+
+                const modeData = {
+                    driving: { emoji: '🚗', label: 'Drive', data: t.driving },
+                    walking: { emoji: '🚶', label: 'Walk', data: t.walking },
+                    transit: { emoji: '🚇', label: 'Transit', data: t.transit }
+                };
+
+                const active = modeData[mode];
+                const travelText = active.data ? `${active.emoji} ${active.label} ${active.data.duration}` : `${active.emoji} No data`;
 
                 const prevVenue = sortedVenues[idx - 1];
                 const conflict = checkScheduleConflict(prevVenue, v);
 
                 let conflictWarning = '';
                 if (conflict.hasConflict) {
-                    if (conflict.type === 'impossible') {
-                        conflictWarning = `<div class="conflict-error">${conflict.message}</div>`;
-                    } else if (conflict.type === 'tight') {
-                        conflictWarning = `<div class="conflict-warning">${conflict.message}</div>`;
-                    }
+                    conflictWarning = conflict.type === 'impossible'
+                        ? `<div class="conflict-error">${conflict.message}</div>`
+                        : `<div class="conflict-warning">${conflict.message}</div>`;
                 }
 
-                travelInfo = `<div class="travel-info">🚗 ${driveInfo}${conflictWarning}</div>`;
+                const toggleBtns = ['driving', 'walking', 'transit'].map(m => {
+                    const isActive = mode === m;
+                    const labels = { driving: '🚗 Drive', walking: '🚶 Walk', transit: '🚇 Transit' };
+                    return `<button onclick="changeTravelMode(${day.dayNumber}, ${actualIdx}, '${m}')" 
+            style="padding: 4px 10px; font-size: 11px; border: 1px solid #D4D4D0; border-radius: 2px; cursor: pointer;
+            background: ${isActive ? '#1A1A1A' : '#FFF'}; color: ${isActive ? '#FFF' : '#4A4A45'};">
+            ${labels[m]}</button>`;
+                }).join('');
+
+                travelInfo = `
+        <div class="travel-info">
+            ${travelText}
+            <div style="display: flex; gap: 6px; margin-top: 8px;">${toggleBtns}</div>
+            ${conflictWarning}
+        </div>`;
             }
 
             return `
@@ -2280,6 +2323,7 @@ ${travelInfo}
     </div>
 </div>`;
         }
+
         function editVenueTime(dayNumber, venueIndex) {
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
@@ -2329,6 +2373,14 @@ ${travelInfo}
                     alert('Duration must be between 1 and 480 minutes (8 hours)');
                 }
             }
+        }
+
+        function changeTravelMode(dayNumber, venueIndex, mode) {
+            const day = tripDays.find(d => d.dayNumber === dayNumber);
+            if (!day) return;
+
+            day.venues[venueIndex].legTravelMode = mode;
+            displayDaysTimeline();
         }
 
         function editVenueCategory(dayNumber, venueIndex) {
