@@ -1917,6 +1917,10 @@
 
         function newTrip() {
             if (confirm('Start a new trip? Current unsaved changes will be lost.')) {
+
+                // Clear the URL
+                window.history.pushState({}, '', window.location.pathname);
+
                 document.getElementById('trip-name').value = '';
                 hotelData = null;
                 tripDays = [];
