@@ -962,6 +962,86 @@
             border-left-color: #1A1A1A;
             background: #F5F5F3;
         }
+
+        #edit-panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.25);
+            z-index: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #edit-panel {
+            background: #FFFFFF;
+            padding: 36px;
+            border-radius: 3px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+            width: 360px;
+            max-width: 92vw;
+        }
+        #edit-panel-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #1A1A1A;
+        }
+        .duration-preset {
+            padding: 6px 14px;
+            font-size: 12px;
+            border: 1px solid #E8E8E5;
+            background: #FFFFFF;
+            color: #4A4A45;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            letter-spacing: 0;
+            text-transform: none;
+            width: auto;
+        }
+        .duration-preset:hover, .duration-preset.selected {
+            background: #1A1A1A;
+            color: #FFFFFF;
+            border-color: #1A1A1A;
+        }
+        .category-group-label {
+            padding: 8px 14px;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: #9B9B96;
+            background: #FAFAF8;
+            border-bottom: 1px solid #F0F0ED;
+        }
+        .category-option {
+            padding: 10px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            border-bottom: 1px solid #F8F8F6;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            color: #1A1A1A;
+            transition: background 0.1s ease;
+        }
+        .category-option:hover { background: #F5F5F3; }
+        .category-option.selected { background: #F5F5F3; font-weight: 400; }
+        .edit-panel-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+        .edit-panel-label {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #9B9B96;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 
@@ -2583,55 +2663,81 @@ ${travelInfo}
 </div>`;
         }
 
+        let _editPanelSaveHandler = null;
+
+        function openEditPanel(title, contentHTML, onSave) {
+            document.getElementById('edit-panel-title').textContent = title;
+            document.getElementById('edit-panel-content').innerHTML = contentHTML;
+            _editPanelSaveHandler = onSave;
+            document.getElementById('edit-panel-overlay').style.display = 'flex';
+            setTimeout(() => {
+                const first = document.querySelector('#edit-panel-content input, #edit-panel-content textarea');
+                if (first) first.focus();
+            }, 50);
+        }
+
+        function closeEditPanel() {
+            document.getElementById('edit-panel-overlay').style.display = 'none';
+            _editPanelSaveHandler = null;
+        }
+
+        function saveEditPanel() {
+            if (_editPanelSaveHandler && _editPanelSaveHandler() !== false) closeEditPanel();
+        }
+
+        function selectCategoryOption(el) {
+            document.querySelectorAll('#edit-panel-content .category-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function selectDurationPreset(el, minutes) {
+            document.querySelectorAll('#edit-panel-content .duration-preset').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('edit-duration-input').value = minutes;
+        }
+
         function editVenueTime(dayNumber, venueIndex) {
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
-
             const venue = day.venues[venueIndex];
-            const newTime = prompt('Enter time (HH:MM in 24-hour format):\nExample: 09:00 or 14:30', venue.time || '12:00');
-
-            if (newTime !== null && newTime.trim() !== '') {
-                const trimmed = newTime.trim();
-
-                if (!/^\d{1,2}:\d{2}$/.test(trimmed)) {
-                    alert('Invalid format! Use HH:MM (e.g., 09:00 or 14:30)');
-                    return;
-                }
-
-                const [hours, mins] = trimmed.split(':');
-                venue.time = `${hours.padStart(2, '0')}:${mins}`;
-
-                day.venues.sort((a, b) => {
-                    if (!a.time) return 1;
-                    if (!b.time) return -1;
-                    return a.time.localeCompare(b.time);
-                });
-
+            openEditPanel('Edit Time', `
+                <div class="edit-panel-label">Start Time</div>
+                <input type="time" id="edit-time-input" value="${venue.time || ''}"
+                    style="width:100%; padding:12px 16px; border:1px solid #D4D4D0; background:#FFFFFF;
+                    border-radius:2px; font-size:14px; font-family:'Inter',sans-serif; font-weight:300; color:#1A1A1A; box-sizing:border-box;">
+            `, () => {
+                const val = document.getElementById('edit-time-input').value;
+                if (!val) return false;
+                const conflict = day.venues.find(v => v !== venue && v.time === val);
+                if (conflict) { alert(`${conflict.name} is already scheduled at ${formatTime(val)}.`); return false; }
+                venue.time = val;
+                day.venues.sort((a, b) => { if (!a.time) return 1; if (!b.time) return -1; return a.time.localeCompare(b.time); });
                 displayDaysTimeline();
-            }
+            });
         }
 
         function editVenueDuration(dayNumber, venueIndex) {
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
-
             const venue = day.venues[venueIndex];
-            const currentDuration = venue.duration || 60;
-
-            const newDuration = prompt(
-                'Enter duration in minutes:\n\nSuggested durations:\n• Quick meal: 30 min\n• Casual dining: 90 min\n• Fine dining: 120 min\n• Museum: 120 min\n• Bar: 90 min',
-                currentDuration
-            );
-
-            if (newDuration !== null && newDuration.trim() !== '') {
-                const duration = parseInt(newDuration);
-                if (duration > 0 && duration <= 480) {
-                    venue.duration = duration;
-                    displayDaysTimeline();
-                } else {
-                    alert('Duration must be between 1 and 480 minutes (8 hours)');
-                }
-            }
+            const current = venue.duration || 60;
+            const presets = [20, 30, 45, 60, 90, 120, 150, 180];
+            const presetHTML = presets.map(p => {
+                const label = p < 60 ? p + ' min' : (p % 60 === 0 ? (p/60) + ' hr' : Math.floor(p/60) + 'h ' + (p%60) + 'm');
+                return `<button class="duration-preset${current === p ? ' selected' : ''}" onclick="selectDurationPreset(this, ${p})">${label}</button>`;
+            }).join('');
+            openEditPanel('Edit Duration', `
+                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;">${presetHTML}</div>
+                <div class="edit-panel-label">Custom (minutes)</div>
+                <input type="number" id="edit-duration-input" value="${current}" min="5" max="480"
+                    style="width:100%; padding:12px 16px; border:1px solid #D4D4D0; background:#FFFFFF;
+                    border-radius:2px; font-size:14px; font-family:'Inter',sans-serif; font-weight:300; color:#1A1A1A; box-sizing:border-box;">
+            `, () => {
+                const val = parseInt(document.getElementById('edit-duration-input').value);
+                if (!val || val < 5 || val > 480) { alert('Duration must be between 5 and 480 minutes.'); return false; }
+                venue.duration = val;
+                displayDaysTimeline();
+            });
         }
 
         function changeTravelMode(dayNumber, venueIndex, mode) {
@@ -2656,59 +2762,30 @@ ${travelInfo}
         function editVenueCategory(dayNumber, venueIndex) {
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
-
             const venue = day.venues[venueIndex];
-
-            const categories = [
-                "Restaurants/Quick Bites",
-                "Restaurants/Casual Dining",
-                "Restaurants/High-End",
-                "Restaurants/Brunch",
-                "Restaurants/Cafe",
-                "Restaurants/Bakery",
-                "Restaurants/Food Hall",
-                "Bars/Dive",
-                "Bars/Specialty Cocktails",
-                "Bars/Wine",
-                "Bars/Brewery",
-                "Bars/Rooftop",
-                "Bars/Live Music",
-                "Attractions/Museums",
-                "Attractions/Historic Site",
-                "Attractions/Theater",
-                "Attractions/Aquarium",
-                "Attractions/Library",
-                "Attractions/Park",
-                "Attractions/Church",
-                "Attractions/Square",
-                "Attractions/Zoo",
-                "Attractions/Beach",
-                "Attractions/Viewpoint",
-                "Shopping/Markets",
-                "Shopping/Stores",
-                "Shopping/Vintage",
-                "Shopping/Bookstore",
-                "Attractions/Art Gallery",
-                "Entertainment/Shows & Events",
-                "Wellness/Spa",
+            const groups = [
+                { label: 'Restaurants', options: ['Quick Bites','Casual Dining','High-End','Brunch','Cafe','Bakery','Food Hall'] },
+                { label: 'Bars', options: ['Dive','Specialty Cocktails','Wine','Brewery','Rooftop','Live Music'] },
+                { label: 'Attractions', options: ['Museums','Art Gallery','Historic Site','Theater','Aquarium','Library','Park','Church','Square','Zoo','Beach','Viewpoint'] },
+                { label: 'Shopping', options: ['Markets','Stores','Vintage','Bookstore'] },
+                { label: 'Entertainment', options: ['Shows & Events'] },
+                { label: 'Wellness', options: ['Spa'] },
             ];
-
-            let options = "Choose new category:\n\n";
-            categories.forEach((cat, idx) => {
-                options += `${idx + 1}. ${cat.split('/')[1]}\n`;
+            const listHTML = groups.map(g => `
+                <div class="category-group-label">${g.label}</div>
+                ${g.options.map(opt => {
+                    const val = g.label + '/' + opt;
+                    return `<div class="category-option${venue.category === val ? ' selected' : ''}" data-value="${val}" onclick="selectCategoryOption(this)">${opt}</div>`;
+                }).join('')}
+            `).join('');
+            openEditPanel('Edit Category', `
+                <div style="max-height:280px; overflow-y:auto; border:1px solid #E8E8E5; border-radius:2px;">${listHTML}</div>
+            `, () => {
+                const selected = document.querySelector('#edit-panel-content .category-option.selected');
+                if (!selected) { alert('Please select a category.'); return false; }
+                venue.category = selected.dataset.value;
+                displayDaysTimeline();
             });
-
-            const choice = prompt(options + "\nEnter number (1-" + categories.length + "):");
-
-            if (choice !== null) {
-                const index = parseInt(choice) - 1;
-                if (index >= 0 && index < categories.length) {
-                    venue.category = categories[index];
-                    displayDaysTimeline();
-                } else {
-                    alert('Invalid choice');
-                }
-            }
         }
 
         function deleteVenue(category, venueIndex) {
@@ -2763,11 +2840,15 @@ ${travelInfo}
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
             const venue = day.venues[venueIndex];
-            const newNote = prompt('Note for this venue:', venue.notes || '');
-            if (newNote !== null) {
-                venue.notes = newNote.trim() || null;
+            openEditPanel(venue.notes ? 'Edit Note' : 'Add Note', `
+                <textarea id="edit-note-input" placeholder="Add a note for this venue..."
+                    style="width:100%; height:100px; padding:12px 16px; border:1px solid #D4D4D0; background:#FFFFFF;
+                    border-radius:2px; font-size:13px; font-family:'Inter',sans-serif; font-weight:300; color:#1A1A1A;
+                    line-height:1.6; resize:vertical; box-sizing:border-box;">${venue.notes || ''}</textarea>
+            `, () => {
+                venue.notes = document.getElementById('edit-note-input').value.trim() || null;
                 displayDaysTimeline();
-            }
+            });
         }
 
         function renderDaySummary(sortedVenues) {
@@ -2859,6 +2940,16 @@ ${travelInfo}
 
             const surpriseModal = document.getElementById('surprise-modal');
             if (e.target === surpriseModal) closeSurpriseModal();
+
+            const editOverlay = document.getElementById('edit-panel-overlay');
+            if (e.target === editOverlay) closeEditPanel();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (document.getElementById('edit-panel-overlay').style.display === 'flex') {
+                if (e.key === 'Escape') closeEditPanel();
+                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); saveEditPanel(); }
+            }
         });
 
         window.addEventListener('scroll', function () {
@@ -2931,6 +3022,17 @@ ${travelInfo}
     </script>
 
     <div id="day-nav"></div>
+
+    <div id="edit-panel-overlay">
+        <div id="edit-panel">
+            <div id="edit-panel-title"></div>
+            <div id="edit-panel-content"></div>
+            <div class="edit-panel-actions">
+                <button onclick="closeEditPanel()">Cancel</button>
+                <button onclick="saveEditPanel()" class="btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
 
     <div id="undo-toast" style="display: none; position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
     background: #1A1A1A; color: #FFFFFF; padding: 12px 20px; border-radius: 3px;
