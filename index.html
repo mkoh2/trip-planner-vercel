@@ -16,14 +16,23 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
+    <!-- flatpickr: date range picker used for selecting trip start/end dates -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <title>Locationary</title>
+    <!-- Two typefaces:
+         Cormorant Garamond (serif) — headings and the wordmark, gives an editorial / luxury feel
+         Inter (sans-serif) — body text, labels, and buttons for readability -->
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap"
         rel="stylesheet">
     <style>
+        /* ============================================
+           BASE RESET & GLOBAL DEFAULTS
+           box-sizing: border-box makes padding/border
+           included in element widths — avoids overflow surprises.
+           ============================================ */
         * {
             margin: 0;
             padding: 0;
@@ -123,6 +132,12 @@
             border-radius: 3px;
         }
 
+        /* ============================================
+           COMPONENT STYLES
+           ============================================ */
+
+        /* Filter buttons in the venue list — smaller than the default button,
+           with an "active" state that darkens border and background. */
         .filter-btn {
             padding: 8px 16px;
             margin: 4px;
@@ -208,6 +223,8 @@
             color: #4A4A45;
         }
 
+        /* Conflict indicators shown between venue items when the schedule is tight or impossible.
+           Yellow (.conflict-warning) = tight but doable; Red (.conflict-error) = not enough time. */
         .conflict-warning {
             background: #FFF3E0;
             color: #E65100;
@@ -316,6 +333,12 @@
             flex-wrap: wrap;
         }
 
+        /* ============================================
+           STICKY HEADER
+           The header starts tall and centered. Once the user scrolls
+           past 80px (see scroll listener in JS), the JS adds the
+           .shrunk class which turns it into a slim fixed top bar.
+           ============================================ */
         #site-header {
             width: 100%;
             display: flex;
@@ -328,6 +351,7 @@
             z-index: 99;
         }
 
+        /* Collapsed state: fixed to the top of the viewport, slim bar */
         #site-header.shrunk {
             position: fixed;
             top: 0;
@@ -374,6 +398,12 @@
             }
         }
 
+        /* ============================================
+           PRINT STYLES
+           When the user prints (Ctrl+P / Cmd+P), hide everything
+           except the itinerary list. Buttons, weather, maps, and
+           the venue-add form are all suppressed.
+           ============================================ */
         @media print {
             body {
                 background: white;
@@ -578,8 +608,11 @@
         }
 
         /* ============================================
-   MOBILE RESPONSIVE STYLES
-   ============================================ */
+           MOBILE RESPONSIVE STYLES
+           Two breakpoints: 768px (tablets/phones) and 375px (small phones).
+           Key changes: stack form rows vertically, increase touch targets,
+           reduce map height, hide the day-nav sidebar.
+           ============================================ */
 
         @media (max-width: 768px) {
             body {
@@ -925,6 +958,13 @@
             }
         }
 
+        /* ============================================
+           FLOATING DAY NAVIGATION SIDEBAR
+           Fixed panel on the left edge, visible only on wide screens (≥1440px).
+           Shows one entry per trip day; the active entry highlights as the user
+           scrolls (see updateActiveDay() and setupItineraryObserver() in JS).
+           Hidden entirely via opacity/pointer-events when no itinerary is loaded.
+           ============================================ */
         #day-nav {
             position: fixed;
             left: 16px;
@@ -963,6 +1003,12 @@
             background: #F5F5F3;
         }
 
+        /* ============================================
+           EDIT PANEL MODAL
+           Overlay + centered card used for editing a venue's time,
+           duration, category, or notes. Shown via openEditPanel() in JS.
+           The overlay click closes the panel (see document click listener).
+           ============================================ */
         #edit-panel-overlay {
             position: fixed;
             inset: 0;
@@ -1046,6 +1092,13 @@
 </head>
 
 <body>
+
+    <!-- ============================================
+         SITE HEADER
+         Starts as a tall centered wordmark. On scroll >80px
+         the JS adds .shrunk and it collapses into a fixed top bar
+         with the About link visible.
+         ============================================ -->
     <header id="site-header">
         <span id="header-wordmark">L O C A T I O N A R Y</span>
         <span onclick="openAbout()" style="position: absolute; right: 24px; font-size: 11px; 
@@ -1053,6 +1106,12 @@
         color: #9B9B96; cursor: pointer; transition: opacity 0.3s ease;" id="about-link">About</span>
     </header>
 
+    <!-- ============================================
+         TRIP MANAGEMENT BAR
+         Trip name input + Load/New buttons at the top.
+         The #saved-trips-list div below is hidden by default;
+         clicking "Load" calls toggleSavedTrips() to reveal it.
+         ============================================ -->
     <div id="trip-management"
         style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
         <div>
@@ -1069,6 +1128,12 @@
         <div id="saved-trips-list" style="width: 100%; display: none;"></div>
     </div>
 
+    <!-- ============================================
+         HOTEL SECTION
+         The left black border visually marks this as the "anchor" of the trip.
+         Selecting a hotel via autocomplete populates hotelData and re-centers the
+         map, then reinitializes venue search biased around the hotel's location.
+         ============================================ -->
     <div class="section" id="hotel-section" style="border-left: 4px solid #1A1A1A;">
         <h2 style="margin-bottom: 4px;">Where are you staying?</h2>
         <p style="color: #9B9B96; font-size: 12px; letter-spacing: 0.3px; margin-bottom: 20px;">
@@ -1079,6 +1144,12 @@
         <div id="hotel-display" style="margin-top: 16px; color: #6B6B66; font-size: 14px;"></div>
     </div>
 
+    <!-- ============================================
+         TRIP DATES SECTION
+         Uses flatpickr in range mode to pick start and end dates.
+         "Generate Days" then calls generateDays() which builds the
+         tripDays array and renders the day-by-day itinerary.
+         ============================================ -->
     <div class="section" id="trip-dates-section">
         <h2>Trip Dates</h2>
         <div class="input-row">
@@ -1093,6 +1164,13 @@
         </div>
     </div>
 
+    <!-- ============================================
+         VENUE ADD SECTION (sticky)
+         Sticks near the top while scrolling so the user can always add venues
+         without scrolling back up. Contains the venue search autocomplete,
+         category/day/time inputs, and the "Surprise Me" button.
+         The inner #venue-form can be collapsed via toggleVenueForm().
+         ============================================ -->
     <div class="section" id="venue-section"
         style="position: sticky; top: 15px; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -1188,6 +1266,12 @@
         <h2 style="margin: 0;">Itinerary</h2>
     </div>
 
+    <!-- ============================================
+         ITINERARY FILTER BUTTONS
+         Only visible in "venue list" mode (no days generated).
+         Hidden when the day-by-day timeline is active.
+         Each button has a data-filter attribute read by setupFilterButtons().
+         ============================================ -->
     <div id="filter-buttons" style="margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #F0F0ED;">
         <button class="filter-btn active" data-filter="all">All</button>
         <button class="filter-btn" data-filter="restaurants">Restaurants</button>
@@ -1221,12 +1305,36 @@
     </div>
 
     <script>
-        let hotelData = null;
-        let tripDays = [];
-        let tripStartDate = null;
-        let tripEndDate = null;
-        let venueAutocomplete = null;
+        // ============================================
+        // GLOBAL STATE
+        // All mutable app state lives here. There is no framework —
+        // functions read and write these directly, then call a display
+        // function to re-render the affected part of the DOM.
+        // ============================================
 
+        let hotelData = null;       // { name, address, lat, lng, placeId } — set when user picks a hotel
+        let tripDays = [];          // Array of day objects: { dayNumber, date, displayDate, venues[] }
+        let tripStartDate = null;   // 'YYYY-MM-DD' string from flatpickr
+        let tripEndDate = null;     // 'YYYY-MM-DD' string from flatpickr
+        let venueAutocomplete = null; // Google Maps Autocomplete instance for the venue search input
+
+        let selectedVenue = null;   // Venue object staged from autocomplete, waiting to be added
+        let currentFilter = 'all'; // Active filter key in the venue list view
+        let weatherData = null;    // Cached OpenWeatherMap response (reset when hotel changes)
+        let undoState = null;      // Snapshot of the last deleted venue for undo; null when expired
+        let undoTimer = null;      // setTimeout handle for the 6-second undo window
+        let map = null;            // Google Maps instance
+        let hotelMarker = null;    // Single marker for the hotel (styled with 'H' label)
+        let venueMarkers = [];     // All venue markers currently on the map
+        let collapsedDays = new Set(); // Day numbers that the user has collapsed in the itinerary
+
+        // ============================================
+        // createEmptyVenues()
+        // Returns a fresh venues object with every supported category
+        // pre-initialized to an empty array. This is the schema for the
+        // `venues` variable used in "list mode" (no days generated).
+        // Categories use "Group/SubCategory" keys matching the <select> options.
+        // ============================================
         function createEmptyVenues() {
             return {
                 "Restaurants/Quick Bites": [],
@@ -1264,16 +1372,15 @@
         }
         let venues = createEmptyVenues();
 
-        let selectedVenue = null;
-        let currentFilter = 'all';
-        let weatherData = null;
-        let undoState = null;
-        let undoTimer = null;
-        let map = null;
-        let hotelMarker = null;
-        let venueMarkers = [];
-        let collapsedDays = new Set();
-
+        // ============================================
+        // generateDaysFromDates(startDate, endDate)
+        // Builds the tripDays array from two 'YYYY-MM-DD' strings.
+        // Uses local date construction (new Date(year, month-1, day)) instead
+        // of new Date(string) to avoid timezone offset issues where 'YYYY-MM-DD'
+        // parsed as UTC would shift the date backward one day in negative-offset zones.
+        // Each day gets a dayNumber (1-based), an ISO date string, and a human
+        // display string like "Monday, May 5".
+        // ============================================
         function generateDaysFromDates(startDate, endDate) {
             tripDays = [];
             const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
@@ -1294,6 +1401,13 @@
             return tripDays;
         }
 
+        // ============================================
+        // initMap()
+        // Google Maps API callback — the Maps script tag at the bottom of the
+        // file calls this automatically once the API has loaded (callback=initMap).
+        // Everything that depends on the Maps API is initialized here rather than
+        // in a DOMContentLoaded listener, because the Maps library may load async.
+        // ============================================
         function initMap() {
             initializeMap();
             initHotelSearch();
@@ -1333,6 +1447,12 @@
             loadFromURL();
         }
 
+        // ============================================
+        // toggleSavedTrips()
+        // Shows or hides the saved-trips dropdown under the "Load" button.
+        // Refreshes the list from localStorage each time it opens so that
+        // trips saved in another tab are visible immediately.
+        // ============================================
         function toggleSavedTrips() {
             const list = document.getElementById('saved-trips-list');
             const isVisible = list.style.display !== 'none';
@@ -1344,6 +1464,13 @@
             }
         }
 
+        // ============================================
+        // loadFromURL()
+        // Called on page load. Checks for a ?trip=<id> query parameter
+        // and fetches the corresponding trip from Redis via /api/load-trip.
+        // This is how shared URLs work — the ID in the URL acts as a key
+        // to the full itinerary stored server-side.
+        // ============================================
         async function loadFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
             const tripId = urlParams.get('trip');
@@ -1375,6 +1502,13 @@
             }
         }
 
+        // ============================================
+        // initializeMap()
+        // Creates the Google Maps instance with a custom monochrome style
+        // that matches the app's neutral color palette (off-white land,
+        // grey roads, light grey water). Starts zoomed out to show the whole
+        // world until a hotel is selected, then re-centers via updateHotelMarker().
+        // ============================================
         function initializeMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 2,
@@ -1401,6 +1535,13 @@
             });
         }
 
+        // ============================================
+        // updateHotelMarker()
+        // Removes any existing hotel marker, places a new filled circle
+        // labelled 'H' at the hotel's coordinates, attaches an info window,
+        // and re-centers + zooms the map to the hotel. Called every time
+        // hotelData changes (initial selection or loading a saved trip).
+        // ============================================
         function updateHotelMarker() {
             if (!hotelData || !map) return;
 
@@ -1443,6 +1584,13 @@
             map.setZoom(14);
         }
 
+        // ============================================
+        // copyURL()
+        // Copies the current shareable URL to the clipboard.
+        // If the trip hasn't been saved yet (no ?trip= in the URL), it
+        // silently saves first to get an ID, then copies the updated URL.
+        // Falls back to an alert with the URL if clipboard API is unavailable.
+        // ============================================
         async function copyURL() {
             const tripName = document.getElementById('trip-name').value.trim();
             if (!tripName) {
@@ -1468,12 +1616,26 @@
                 alert(`Share this URL:\n${url}`);
             });
         }
+        // ============================================
+        // toggleVenueMenu(menuId)
+        // Opens or closes the ⋮ dropdown menu on a venue card.
+        // Always closes all other open menus first so only one is
+        // open at a time. The global click listener (below) closes any
+        // open menu when the user clicks elsewhere on the page.
+        // ============================================
         function toggleVenueMenu(menuId) {
             const menu = document.getElementById(menuId);
             const isOpen = menu.style.display !== 'none';
             document.querySelectorAll('[id^="menu-"]').forEach(m => m.style.display = 'none');
             menu.style.display = isOpen ? 'none' : 'block';
         }
+        // ============================================
+        // getCategoryColor(category)
+        // Maps a "Group/SubCategory" string to a hex color used for
+        // map markers and timeline cards. Colors are intentionally muted
+        // to stay consistent with the neutral palette. Returns a default
+        // grey for any category not in the map.
+        // ============================================
         function getCategoryColor(category) {
             const colors = {
                 'Restaurants/Quick Bites': '#8B7355',
@@ -1505,6 +1667,19 @@
             return colors[category] || '#6B6B66';
         }
 
+        // ============================================
+        // Surprise Me modal — openSurpriseModal / closeSurpriseModal / runSurpriseMe
+        //
+        // "Surprise Me" auto-fills the itinerary by:
+        //   1. Fetching top-rated places from Google Maps near the hotel
+        //      (via /api/places-search, which caches results in Redis)
+        //   2. Assigning them to time slots using a preferred-type schedule
+        //      (e.g. cafe/bakery at 9am, restaurant at 12pm, bar at 8:30pm)
+        //   3. Falling back to any unused place if no type-match exists for a slot
+        //   4. Calculating hotel→venue distances for each picked place
+        //
+        // The modal requires hotelData and tripDays to already be set.
+        // ============================================
         function openSurpriseModal() {
             if (!hotelData) {
                 alert('Please set your hotel first.');
@@ -1643,6 +1818,14 @@
             }
         }
 
+        // ============================================
+        // updateVenueMarkers()
+        // Clears all existing venue markers and redraws them.
+        // Two modes:
+        //   - No days: iterates the `venues` category object (list mode)
+        //   - Days exist: iterates tripDays and numbers markers sequentially
+        //     across all days (1, 2, 3... across the full trip)
+        // ============================================
         function updateVenueMarkers() {
             if (!map) return;
 
@@ -1669,6 +1852,13 @@
             }
         }
 
+        // ============================================
+        // createVenueMarker(venue, category, label, day)
+        // Places a colored circle marker on the map for a single venue.
+        // Color comes from getCategoryColor(). An info window shows the venue
+        // name, address, and walking/driving times on click.
+        // `day` is optional — included in the info window when in day-mode.
+        // ============================================
         function createVenueMarker(venue, category, label, day = null) {
             const marker = new google.maps.Marker({
                 position: { lat: venue.lat, lng: venue.lng },
@@ -1706,6 +1896,13 @@
             venueMarkers.push(marker);
         }
 
+        // ============================================
+        // initHotelSearch()
+        // Attaches a Google Places Autocomplete to the hotel search input,
+        // restricted to 'lodging' type results. On selection, populates
+        // hotelData and calls displayHotel() to update the map and
+        // reinitialize the venue search biased toward the hotel's location.
+        // ============================================
         function initHotelSearch() {
             const input = document.getElementById('hotel-search');
             const autocomplete = new google.maps.places.Autocomplete(input, {
@@ -1735,6 +1932,15 @@
             });
         }
 
+        // ============================================
+        // initVenueSearch(centerLocation)
+        // Attaches (or re-attaches) a Google Places Autocomplete to the
+        // venue search input. When `centerLocation` is provided (a LatLng
+        // at the hotel), results are biased within a ~6-mile radius of the
+        // hotel — not strictly bounded, so worldwide results still appear
+        // if there are no local matches. Re-called whenever the hotel changes
+        // so the bias updates to the new location.
+        // ============================================
         function initVenueSearch(centerLocation = null) {
             const input = document.getElementById('venue-search');
             const options = {
@@ -1781,6 +1987,13 @@
             });
         }
 
+        // ============================================
+        // suggestCategory(types)
+        // Pre-selects a category in the dropdown based on the Google place
+        // type array returned by the Autocomplete. Covers the most common
+        // cases (bar, bakery, cafe, restaurant, museum, library, park).
+        // The user can always override the suggestion before adding.
+        // ============================================
         function suggestCategory(types) {
             const categorySelect = document.getElementById('category-select');
 
@@ -1810,6 +2023,16 @@
 
         }
 
+        // ============================================
+        // addVenueToList()
+        // Validates inputs, fetches hotel→venue distances (walking + driving),
+        // then adds the venue to the appropriate container:
+        //   - If days exist: pushes to the specific day's venues array
+        //   - Otherwise: pushes to the `venues` category object (list mode)
+        // Checks for time conflicts before adding in day mode.
+        // Falls back gracefully (null distances) if the distance API fails.
+        // Clears the form fields after a successful add.
+        // ============================================
         async function addVenueToList() {
             const categorySelect = document.getElementById('category-select');
             const daySelect = document.getElementById('day-select');
@@ -1904,6 +2127,13 @@
             }
         }
 
+        // ============================================
+        // displayVenueList()
+        // Renders the flat venue list used when no trip days have been generated.
+        // Applies the `currentFilter` to show only matching categories.
+        // Filter modes: 'all', 'restaurants' (any Restaurants/*), 'bars'
+        // (any Bars/*), or an exact category key like 'Bars/Dive'.
+        // ============================================
         function displayVenueList() {
             const listDisplay = document.getElementById('list-display');
             document.getElementById('filter-buttons').style.display = 'block';
@@ -1960,6 +2190,14 @@
             updateVenueMarkers();
         }
 
+        // ============================================
+        // calculateDistances(venue)
+        // Fetches hotel→venue travel data for walking and driving in parallel.
+        // Returns { walking: { distance, duration }, driving: { distance, duration } }
+        // or null if hotelData is not set or the API call fails.
+        // Used when adding a venue — the result is stored on the venue object
+        // so the "From hotel" info can be displayed without re-fetching.
+        // ============================================
         async function calculateDistances(venue) {
             if (!hotelData) return null;
 
@@ -2002,6 +2240,14 @@
             }
         }
 
+        // ============================================
+        // calculateVenueToVenueDistance(fromVenue, toVenue)
+        // Fetches travel data between two consecutive venues for all three
+        // modes (walking, driving, transit) in parallel. Returns an object
+        // with each mode's distance, duration string, and durationMinutes
+        // (used for conflict detection). Called when rendering the day timeline
+        // so the user can see and switch between travel modes between stops.
+        // ============================================
         async function calculateVenueToVenueDistance(fromVenue, toVenue) {
             try {
                 const makeRequest = (mode) => fetch('/api/distance', {
@@ -2049,6 +2295,16 @@
             }
         }
 
+        // ============================================
+        // fetchWeatherForTrip()
+        // Fetches a 5-day / 3-hour forecast from OpenWeatherMap (via /api/weather)
+        // for the hotel's coordinates. The response is cached in `weatherData` for
+        // the session — changing the hotel resets weatherData so a fresh fetch occurs.
+        // Groups the 3-hour slots by date, then picks the midday slot as the
+        // representative condition (icon + description) and computes the day's
+        // high/low from all slots. Injects the result into #weather-day-N elements
+        // inside each day card.
+        // ============================================
         async function fetchWeatherForTrip() {
             if (!hotelData || tripDays.length === 0) return;
 
@@ -2119,6 +2375,12 @@
             }
         }
 
+        // ============================================
+        // setupFilterButtons()
+        // Attaches click handlers to the .filter-btn elements in the DOM.
+        // Toggling a button updates `currentFilter` and re-renders the venue
+        // list. Called once from initMap() — the buttons are static HTML.
+        // ============================================
         function setupFilterButtons() {
             const filterButtons = document.querySelectorAll('.filter-btn');
             filterButtons.forEach(button => {
@@ -2132,6 +2394,13 @@
             });
         }
 
+        // ============================================
+        // displayHotel()
+        // Updates the hotel display text, places the map marker, and
+        // reinitializes venue search biased around the hotel's LatLng.
+        // Also resets weatherData to null — the next displayDaysTimeline()
+        // call will fetch fresh weather for the new location.
+        // ============================================
         function displayHotel() {
             weatherData = null;
             const display = document.getElementById('hotel-display');
@@ -2141,6 +2410,16 @@
             initVenueSearch(hotelLocation);
         }
 
+        // ============================================
+        // saveTrip(silent)
+        // Persists the trip in two places:
+        //   1. Redis (via /api/save-trip) — generates or reuses a short ID
+        //      and updates the URL with ?trip=<id> using pushState so the
+        //      address bar stays shareable without a page reload.
+        //   2. localStorage — keyed by trip name so it appears in the "Load"
+        //      dropdown within the same browser even without an internet connection.
+        // `silent = true` skips the success alert (used by copyURL()).
+        // ============================================
         async function saveTrip(silent = false) {
             const tripName = document.getElementById('trip-name').value.trim();
             if (!tripName) {
@@ -2189,6 +2468,12 @@
             localStorage.setItem('tripPlanner_trips', JSON.stringify(savedTrips));
         }
 
+        // ============================================
+        // loadTrip(tripName)
+        // Loads a trip from localStorage by name and restores all global state.
+        // This is the local-only load path (Load dropdown). The URL-based load
+        // path (shared links) uses loadFromURL() which fetches from Redis instead.
+        // ============================================
         function loadTrip(tripName) {
             const savedTrips = JSON.parse(localStorage.getItem('tripPlanner_trips') || '{}');
             const tripData = savedTrips[tripName];
@@ -2218,6 +2503,12 @@
             document.getElementById('saved-trips-list').style.display = 'none';
         }
 
+        // ============================================
+        // newTrip()
+        // Full reset: clears all global state, empties all display elements,
+        // removes map markers, resets map zoom, and clears the ?trip= URL param.
+        // Prompts for confirmation first to avoid accidental data loss.
+        // ============================================
         function newTrip() {
             if (confirm('Start a new trip? Current unsaved changes will be lost.')) {
 
@@ -2254,6 +2545,12 @@
             }
         }
 
+        // ============================================
+        // displaySavedTrips()
+        // Reads all trips from localStorage and renders them as a list
+        // under the "Load" button. Each entry shows the trip name, save date,
+        // a click-to-load action, and a delete (🗑) icon.
+        // ============================================
         function displaySavedTrips() {
             const savedTrips = JSON.parse(localStorage.getItem('tripPlanner_trips') || '{}');
             const tripsList = document.getElementById('saved-trips-list');
@@ -2279,6 +2576,7 @@
             tripsList.innerHTML = html;
         }
 
+        // Removes a single trip from localStorage by name and re-renders the list.
         function deleteTrip(tripName) {
             if (confirm(`Delete "${tripName}"?`)) {
                 let savedTrips = JSON.parse(localStorage.getItem('tripPlanner_trips') || '{}');
@@ -2288,6 +2586,12 @@
             }
         }
 
+        // ============================================
+        // generateDays()
+        // Validates that dates have been picked, then builds tripDays via
+        // generateDaysFromDates() and renders the timeline + day dropdown.
+        // Called by the "Generate Days" button.
+        // ============================================
         function generateDays() {
             if (!tripStartDate || !tripEndDate) {
                 alert('Please select your travel dates first');
@@ -2299,6 +2603,11 @@
             updateDayDropdown();
         }
 
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+
+        // Converts a 24-hour time string ('14:30') to 12-hour format ('2:30 PM').
         function formatTime(time24) {
             if (!time24) return '';
             const [hours, minutes] = time24.split(':');
@@ -2308,6 +2617,13 @@
             return `${hour12}:${minutes} ${ampm}`;
         }
 
+        // ============================================
+        // getDefaultDuration(category)
+        // Returns a sensible default visit duration (in minutes) per category.
+        // Used when a venue is added without a manually specified duration.
+        // Quick cafes get 20 min; multi-act theaters or zoos get 120–150 min.
+        // Falls back to 60 min for any unknown category.
+        // ============================================
         function getDefaultDuration(category) {
             const durations = {
                 'Restaurants/Quick Bites': 30,
@@ -2345,6 +2661,7 @@
             return durations[category] || 60;
         }
 
+        // Converts a minute count to a human string: 90 → '1h 30m', 60 → '1h', 45 → '45 min'.
         function formatDuration(minutes) {
             if (!minutes || isNaN(minutes)) return '1h';
             if (minutes < 60) return `${minutes} min`;
@@ -2353,6 +2670,8 @@
             return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
         }
 
+        // Converts a 12-hour time string ('2:30 PM') to 24-hour ('14:30').
+        // Used to parse Google's opening hours strings into comparable values.
         function convertTo24Hour(time12h) {
             const [time, modifier] = time12h.trim().split(/\s+/);
             let [hours, minutes] = time.split(':');
@@ -2368,6 +2687,16 @@
             return `${String(hours).padStart(2, '0')}:${minutes}`;
         }
 
+        // ============================================
+        // isVenueOpenAtTime(venue, tripDate, timeString)
+        // Checks whether a venue is open at a given time on a given date,
+        // using the weekday_text array from the Google Places API
+        // (e.g. "Monday: 9:00 AM – 10:00 PM").
+        // Returns { isOpen: true|false|null, reason: string }.
+        // null means the hours couldn't be determined (missing data or
+        // unparseable format). The function handles 'Closed' and '24 hours'
+        // as special cases before attempting regex parsing.
+        // ============================================
         function isVenueOpenAtTime(venue, tripDate, timeString) {
             if (!venue.openingHours || !venue.openingHours.weekday_text || !timeString) {
                 return { isOpen: null, reason: 'Hours not available' };
@@ -2403,6 +2732,9 @@
             }
         }
 
+        // Returns an HTML badge string for the venue's open/closed status,
+        // or an empty string if hours are unavailable. Shown next to the
+        // time badge in each venue card.
         function getOpenStatusBadge(venue, tripDate, timeString) {
             try {
                 if (!venue.openingHours || !venue.openingHours.weekday_text) {
@@ -2423,6 +2755,16 @@
             }
         }
 
+        // ============================================
+        // checkScheduleConflict(currentVenue, nextVenue)
+        // Compares the time gap between two consecutive venues against
+        // the travel time between them (for the selected leg travel mode).
+        // Returns:
+        //   { hasConflict: false }  — enough time to travel + a 15-min buffer
+        //   { hasConflict: true, type: 'tight' }    — <15 min buffer
+        //   { hasConflict: true, type: 'impossible' } — not enough time to travel at all
+        // Results drive the yellow/red warning bars shown between venue items.
+        // ============================================
         function checkScheduleConflict(currentVenue, nextVenue) {
             if (!currentVenue.time || !nextVenue.time || !nextVenue.travelFromPrevious) {
                 return { hasConflict: false, type: null };
@@ -2457,6 +2799,18 @@
             return { hasConflict: false, type: null };
         }
 
+        // ============================================
+        // displayDaysTimeline()
+        // Main render function for the day-by-day itinerary view.
+        // For each day with more than one venue, sorts venues by time and
+        // fetches venue-to-venue distances in parallel (Promise.all per day).
+        // Then calls renderDayCard() for each day and injects the HTML.
+        // Also triggers weather fetch and re-renders the day-nav sidebar.
+        // This is the most expensive function — it fires Google Distance Matrix
+        // calls for every consecutive venue pair on every render. Future
+        // optimization would cache travelFromPrevious and only recalculate
+        // when venues change order.
+        // ============================================
         async function displayDaysTimeline() {
             const listDisplay = document.getElementById('list-display');
             document.getElementById('filter-buttons').style.display = 'none';
@@ -2504,6 +2858,15 @@
             }
         }
 
+        // ============================================
+        // renderDayCard(day)
+        // Generates the HTML for a single day card, including:
+        //   - Collapsible header with date, weather widget placeholder, and arrow
+        //   - Day summary stats (venues, planned time, travel time)
+        //   - Horizontal timeline of timed venues
+        //   - Detailed venue list with travel info and action menus
+        // The card's collapse state is preserved in `collapsedDays` across re-renders.
+        // ============================================
         function renderDayCard(day) {
             const sortedVenues = [...day.venues].sort((a, b) => {
                 if (!a.time) return 1;
@@ -2533,6 +2896,13 @@
 </div>
 </div>`;
         }
+        // ============================================
+        // renderTimeline(day, sortedVenues)
+        // Renders the horizontal scrollable timeline strip at the top of each
+        // day card. Only venues with a set time appear. Each card is colored by
+        // category and shows the time, name, and duration. Arrows between cards
+        // show driving time to the next stop. Skips venues without a time.
+        // ============================================
         function renderTimeline(day, sortedVenues) {
             const venuesWithTime = sortedVenues.filter(v => v.time);
             if (venuesWithTime.length === 0) return '';
@@ -2575,6 +2945,14 @@
             return html;
         }
 
+        // ============================================
+        // renderVenueListItem(v, day, idx, sortedVenues)
+        // Renders a single venue row in the detailed venue list below the timeline.
+        // For venues after the first, prepends a travel-info bar showing distance
+        // and drive/walk/transit toggle buttons. Includes a conflict warning if
+        // the gap between this venue's start time and the previous one's is too tight.
+        // The ⋮ menu gives access to edit time, duration, category, notes, and delete.
+        // ============================================
         function renderVenueListItem(v, day, idx, sortedVenues) {
             const actualIdx = day.venues.indexOf(v);
             const isFirst = idx === 0;
@@ -2663,6 +3041,18 @@ ${travelInfo}
 </div>`;
         }
 
+        // ============================================
+        // EDIT PANEL — generic modal for inline venue edits
+        //
+        // openEditPanel(title, contentHTML, onSave)
+        //   Shows the modal with a custom title and content HTML.
+        //   `onSave` is called when the user clicks Save. If onSave returns
+        //   false, the panel stays open (used to keep it open on validation errors).
+        //   Auto-focuses the first input/textarea inside the panel.
+        //
+        // closeEditPanel() — hides the modal and clears the save handler.
+        // saveEditPanel()  — calls the stored handler, closes if it doesn't return false.
+        // ============================================
         let _editPanelSaveHandler = null;
 
         function openEditPanel(title, contentHTML, onSave) {
@@ -2685,17 +3075,24 @@ ${travelInfo}
             if (_editPanelSaveHandler && _editPanelSaveHandler() !== false) closeEditPanel();
         }
 
+        // Highlights the clicked category option and deselects all others
+        // inside the edit panel's category picker list.
         function selectCategoryOption(el) {
             document.querySelectorAll('#edit-panel-content .category-option').forEach(o => o.classList.remove('selected'));
             el.classList.add('selected');
         }
 
+        // Highlights a duration preset button and syncs its value to the
+        // custom-duration number input so both controls stay in agreement.
         function selectDurationPreset(el, minutes) {
             document.querySelectorAll('#edit-panel-content .duration-preset').forEach(b => b.classList.remove('selected'));
             el.classList.add('selected');
             document.getElementById('edit-duration-input').value = minutes;
         }
 
+        // Opens the edit panel for changing a venue's start time.
+        // Validates that the new time doesn't conflict with another venue on the same day.
+        // After saving, re-sorts day.venues by time and re-renders the timeline.
         function editVenueTime(dayNumber, venueIndex) {
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
@@ -2716,6 +3113,9 @@ ${travelInfo}
             });
         }
 
+        // Opens the edit panel for changing a venue's visit duration.
+        // Shows quick preset buttons (20 min, 30 min ... 3 hr) plus a free-text
+        // number input for custom values. Validates 5–480 minutes.
         function editVenueDuration(dayNumber, venueIndex) {
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
@@ -2740,6 +3140,14 @@ ${travelInfo}
             });
         }
 
+        // ============================================
+        // changeTravelMode(dayNumber, venueIndex, mode)
+        // Updates the per-leg travel mode ('driving', 'walking', 'transit')
+        // stored on the venue object. The travel info bar already has data for
+        // all three modes (fetched in parallel) — switching modes just changes
+        // which data is displayed and which conflict threshold is applied.
+        // Re-renders the timeline to update conflict warnings and travel text.
+        // ============================================
         function changeTravelMode(dayNumber, venueIndex, mode) {
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
@@ -2748,6 +3156,10 @@ ${travelInfo}
             displayDaysTimeline();
         }
 
+        // Maps a Google Places `types` array to one of the app's category strings.
+        // Used by "Surprise Me" when assigning auto-picked venues to categories.
+        // Less comprehensive than suggestCategory() — only handles the types
+        // that the Nearby Search API commonly returns.
         function getCategoryFromTypes(types) {
             if (types.includes('bar') || types.includes('night_club')) return 'Bars/Specialty Cocktails';
             if (types.includes('bakery')) return 'Restaurants/Bakery';
@@ -2759,6 +3171,9 @@ ${travelInfo}
             return 'Attractions/Park';
         }
 
+        // Opens the edit panel for re-categorizing a venue.
+        // Renders the full category list grouped by type, with the current
+        // category pre-selected. Saving updates venue.category in place.
         function editVenueCategory(dayNumber, venueIndex) {
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
@@ -2788,6 +3203,22 @@ ${travelInfo}
             });
         }
 
+        // ============================================
+        // DELETE + UNDO SYSTEM
+        //
+        // Deletions are soft: the venue is removed from the array and a
+        // snapshot saved to `undoState`. A toast appears for 6 seconds with
+        // an Undo button. If the user doesn't click Undo, undoState is cleared
+        // and the deletion becomes permanent.
+        //
+        // deleteVenue()        — for list mode (no days)
+        // deleteVenueFromDay() — for day mode; re-ranks remaining list venues
+        // showUndoToast()      — shows the toast and starts the 6-second timer
+        // undoDelete()         — restores the venue at its original index
+        // ============================================
+
+        // Deletes a venue from the flat `venues` object (list mode), re-ranks
+        // the remaining venues in that category, and shows the undo toast.
         function deleteVenue(category, venueIndex) {
             const venue = venues[category][venueIndex];
             undoState = { mode: 'list', category, venueIndex, venue: { ...venue } };
@@ -2797,6 +3228,7 @@ ${travelInfo}
             showUndoToast(`Deleted ${venue.name}`);
         }
 
+        // Deletes a venue from a specific day in day mode and shows the undo toast.
         function deleteVenueFromDay(dayNumber, venueIndex) {
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
@@ -2836,6 +3268,9 @@ ${travelInfo}
             undoState = null;
         }
 
+        // Opens the edit panel for adding or editing a free-text note on a venue.
+        // Notes are stored as venue.notes (string or null) and displayed in italics
+        // below the venue details. Saving null clears the note.
         function editVenueNote(dayNumber, venueIndex) {
             const day = tripDays.find(d => d.dayNumber === dayNumber);
             if (!day) return;
@@ -2851,6 +3286,13 @@ ${travelInfo}
             });
         }
 
+        // ============================================
+        // renderDaySummary(sortedVenues)
+        // Generates the small stats line shown at the top of each day's venue list:
+        // "3 venues · 4h 30m planned · 25 min travel"
+        // Sums visit durations across all venues and travel times across all
+        // travelFromPrevious entries using the per-leg legTravelMode.
+        // ============================================
         function renderDaySummary(sortedVenues) {
             if (sortedVenues.length === 0) return '';
             const totalDuration = sortedVenues.reduce((sum, v) => sum + (v.duration || 0), 0);
@@ -2869,6 +3311,12 @@ ${travelInfo}
             return `<div style="font-size: 12px; color: #9B9B96; margin-bottom: 24px; letter-spacing: 0.3px;">${parts.join(' · ')}</div>`;
         }
 
+        // ============================================
+        // updateDayDropdown()
+        // Refreshes the "Day" <select> in the venue-add form to reflect
+        // the current tripDays array. Disabled when no days have been generated.
+        // Called after generateDays() or whenever tripDays changes.
+        // ============================================
         function updateDayDropdown() {
             const daySelect = document.getElementById('day-select');
 
@@ -2889,6 +3337,14 @@ ${travelInfo}
             });
         }
 
+        // ============================================
+        // toggleDayCollapse(dayNumber)
+        // Collapses or expands a day card's venue content by toggling the
+        // dayNumber in the `collapsedDays` Set and updating the DOM directly
+        // (no full re-render). The arrow indicator switches between ▶ and ▼.
+        // The collapsed state persists across displayDaysTimeline() re-renders
+        // because renderDayCard() reads collapsedDays when generating HTML.
+        // ============================================
         function toggleDayCollapse(dayNumber) {
             if (collapsedDays.has(dayNumber)) {
                 collapsedDays.delete(dayNumber);
@@ -2910,6 +3366,9 @@ ${travelInfo}
             }
         }
 
+        // Toggles the venue-add form open/closed and updates the button label.
+        // Uses getComputedStyle to read the actual rendered display value —
+        // important because CSS media queries can override inline styles.
         function toggleVenueForm() {
             const form = document.getElementById('venue-form');
             const btn = document.getElementById('venue-toggle-btn');
@@ -2924,6 +3383,8 @@ ${travelInfo}
             }
         }
 
+        // Shows/hides the About modal. Also closeable by clicking the backdrop
+        // (handled by the global document click listener below).
         function openAbout() {
             const modal = document.getElementById('about-modal');
             modal.style.display = 'flex';
@@ -2934,6 +3395,13 @@ ${travelInfo}
             modal.style.display = 'none';
         }
 
+        // ============================================
+        // GLOBAL EVENT LISTENERS
+        // ============================================
+
+        // Click-outside-to-close for all three modals (About, Surprise Me, Edit Panel).
+        // Checks if the click target IS the overlay element itself (not a child),
+        // which means the user clicked the dim backdrop area.
         document.addEventListener('click', function (e) {
             const aboutModal = document.getElementById('about-modal');
             if (e.target === aboutModal) closeAbout();
@@ -2945,6 +3413,9 @@ ${travelInfo}
             if (e.target === editOverlay) closeEditPanel();
         });
 
+        // Keyboard shortcuts for the edit panel:
+        //   Escape → close without saving
+        //   Enter  → save (except inside textareas where Enter adds a newline)
         document.addEventListener('keydown', function (e) {
             if (document.getElementById('edit-panel-overlay').style.display === 'flex') {
                 if (e.key === 'Escape') closeEditPanel();
@@ -2952,6 +3423,9 @@ ${travelInfo}
             }
         });
 
+        // Scroll listener: adds/removes .shrunk on the header and compensates
+        // body padding so content doesn't jump when the header goes fixed.
+        // Also calls updateActiveDay() to keep the sidebar nav in sync.
         window.addEventListener('scroll', function () {
             const header = document.getElementById('site-header');
             if (window.scrollY > 80) {
@@ -2964,6 +3438,20 @@ ${travelInfo}
             updateActiveDay();
         });
 
+        // ============================================
+        // DAY NAVIGATION SIDEBAR
+        //
+        // renderDayNav()          — rebuilds the #day-nav list from tripDays;
+        //                           shows/hides the nav based on whether days exist.
+        // scrollToDay(dayNumber)  — smooth-scrolls to a day card, offset by 64px
+        //                           to account for the sticky header.
+        // updateActiveDay()       — highlights the nav item for the day card that
+        //                           is currently at or above 160px from the top.
+        //                           Called on scroll.
+        // setupItineraryObserver()— uses IntersectionObserver on #list-display to
+        //                           show/hide the entire nav based on whether the
+        //                           itinerary is visible in the viewport.
+        // ============================================
         function renderDayNav() {
             const nav = document.getElementById('day-nav');
             if (tripDays.length === 0) {
@@ -3021,8 +3509,14 @@ ${travelInfo}
 
     </script>
 
+    <!-- Floating day-nav sidebar — populated by renderDayNav() in JS -->
     <div id="day-nav"></div>
 
+    <!-- ============================================
+         EDIT PANEL MODAL
+         Generic modal reused for time / duration / category / note edits.
+         Title and content are injected by openEditPanel() in JS.
+         ============================================ -->
     <div id="edit-panel-overlay">
         <div id="edit-panel">
             <div id="edit-panel-title"></div>
@@ -3034,6 +3528,11 @@ ${travelInfo}
         </div>
     </div>
 
+    <!-- ============================================
+         UNDO TOAST
+         Appears at the bottom of the screen for 6 seconds after a venue
+         is deleted. The "Undo" button calls undoDelete() to restore it.
+         ============================================ -->
     <div id="undo-toast" style="display: none; position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
     background: #1A1A1A; color: #FFFFFF; padding: 12px 20px; border-radius: 3px;
     font-size: 13px; z-index: 1000; gap: 16px; align-items: center;
@@ -3043,6 +3542,12 @@ ${travelInfo}
         color: #FFFFFF; padding: 4px 12px; font-size: 12px; width: auto;">Undo</button>
     </div>
 
+    <!-- ============================================
+         ABOUT MODAL
+         Opened by clicking "About" in the sticky header.
+         Explains the app and links to GitHub and feedback email.
+         Closed by the × button, the backdrop click, or Escape key.
+         ============================================ -->
     <div id="about-modal" style="display: none; position: fixed; inset: 0; 
     background: rgba(0,0,0,0.4); z-index: 1000; 
     align-items: center; justify-content: center;">
@@ -3106,6 +3611,12 @@ ${travelInfo}
         </div>
     </div>
 
+    <!-- ============================================
+         SURPRISE ME MODAL
+         Lets the user pick radius, minimum rating, max price, and
+         which categories to include. runSurpriseMe() then auto-fills
+         the itinerary using the Google Places API (cached in Redis).
+         ============================================ -->
     <div id="surprise-modal" style="display: none; position: fixed; inset: 0; 
     background: rgba(0,0,0,0.4); z-index: 1000; 
     align-items: center; justify-content: center;">
@@ -3183,6 +3694,13 @@ ${travelInfo}
         </div>
     </div>
 
+    <!-- ============================================
+         GOOGLE MAPS API SCRIPT
+         Loaded async/defer so it doesn't block page render.
+         `libraries=places` enables the Places Autocomplete used for
+         hotel and venue search. `callback=initMap` tells the API to
+         call our initMap() function once it's ready.
+         ============================================ -->
     <script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8JmsDj85EQ73OlWokJIr85KXcNvEdzeY&libraries=places&callback=initMap"
         async defer></script>
