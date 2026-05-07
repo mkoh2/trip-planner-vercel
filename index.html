@@ -1149,6 +1149,8 @@
         let selectedVenue = null;
         let currentFilter = 'all';
         let weatherData = null;
+        let undoState = null;
+        let undoTimer = null;
         let map = null;
         let hotelMarker = null;
         let venueMarkers = [];
@@ -2400,6 +2402,7 @@
         </div>
     </div>
 <div id="day-${day.dayNumber}-venues" style="${collapsedDays.has(day.dayNumber) ? 'display: none;' : ''}">
+    ${renderDaySummary(sortedVenues)}
     ${sortedVenues.length === 0 ? '<p style="color: #9B9B96; font-size: 14px;">No venues scheduled</p>' : ''}
     
     ${sortedVenues.length > 0 ? renderTimeline(day, sortedVenues) : ''}
@@ -2508,26 +2511,30 @@ ${travelInfo}
                 ${v.rating ? `${v.rating}` : ''} ${v.priceLevel ? '•'.repeat(v.priceLevel) : ''}<br>
                 ${(v.driving || v.walking) ? `<strong>From hotel:</strong> ${v.driving ? `Drive ${v.driving.duration}` : ''} ${v.walking ? `· Walk ${v.walking.duration}` : ''}` : ''}
             </div>
+            ${v.notes ? `<div style="font-size: 12px; color: #6B6B66; font-style: italic; margin-top: 6px;">📝 ${v.notes}</div>` : ''}
         </div>
 <div style="position: relative;">
-    <button onclick="toggleVenueMenu('menu-${day.dayNumber}-${actualIdx}')" 
-        style="padding: 4px 10px; font-size: 18px; border: none; background: transparent; 
+    <button onclick="toggleVenueMenu('menu-${day.dayNumber}-${actualIdx}')"
+        style="padding: 4px 10px; font-size: 18px; border: none; background: transparent;
         cursor: pointer; color: #6B6B66; line-height: 1;">⋮</button>
-    <div id="menu-${day.dayNumber}-${actualIdx}" 
-        style="display: none; position: absolute; right: 0; top: 100%; 
-        background: #FFF; border: 1px solid #E8E8E5; border-radius: 3px; 
+    <div id="menu-${day.dayNumber}-${actualIdx}"
+        style="display: none; position: absolute; right: 0; top: 100%;
+        background: #FFF; border: 1px solid #E8E8E5; border-radius: 3px;
         z-index: 50; min-width: 160px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-<div onclick="editVenueDuration(${day.dayNumber}, ${actualIdx})" 
-    style="display: block; width: 100%; text-align: left; padding: 10px 16px; 
+<div onclick="editVenueDuration(${day.dayNumber}, ${actualIdx})"
+    style="display: block; width: 100%; text-align: left; padding: 10px 16px;
     font-size: 12px; border-bottom: 1px solid #F0F0ED; cursor: pointer;">Edit Duration</div>
 <div onclick="editVenueCategory(${day.dayNumber}, ${actualIdx})"
-    style="display: block; width: 100%; text-align: left; padding: 10px 16px; 
+    style="display: block; width: 100%; text-align: left; padding: 10px 16px;
     font-size: 12px; border-bottom: 1px solid #F0F0ED; cursor: pointer;">Edit Category</div>
 <div onclick="editVenueTime(${day.dayNumber}, ${actualIdx})"
-    style="display: block; width: 100%; text-align: left; padding: 10px 16px; 
+    style="display: block; width: 100%; text-align: left; padding: 10px 16px;
     font-size: 12px; border-bottom: 1px solid #F0F0ED; cursor: pointer;">Edit Time</div>
+<div onclick="editVenueNote(${day.dayNumber}, ${actualIdx})"
+    style="display: block; width: 100%; text-align: left; padding: 10px 16px;
+    font-size: 12px; border-bottom: 1px solid #F0F0ED; cursor: pointer;">${v.notes ? 'Edit Note' : 'Add Note'}</div>
 <div onclick="deleteVenueFromDay(${day.dayNumber}, ${actualIdx})"
-    style="display: block; width: 100%; text-align: left; padding: 10px 16px; 
+    style="display: block; width: 100%; text-align: left; padding: 10px 16px;
     font-size: 12px; cursor: pointer; color: #C62828;">Delete</div>
     </div>
 </div>
@@ -2664,23 +2671,80 @@ ${travelInfo}
         }
 
         function deleteVenue(category, venueIndex) {
-            if (confirm('Delete this venue?')) {
-                venues[category].splice(venueIndex, 1);
-                venues[category].forEach((venue, idx) => {
-                    venue.rank = idx + 1;
-                });
-                displayVenueList();
-            }
+            const venue = venues[category][venueIndex];
+            undoState = { mode: 'list', category, venueIndex, venue: { ...venue } };
+            venues[category].splice(venueIndex, 1);
+            venues[category].forEach((v, idx) => { v.rank = idx + 1; });
+            displayVenueList();
+            showUndoToast(`Deleted ${venue.name}`);
         }
 
         function deleteVenueFromDay(dayNumber, venueIndex) {
-            if (confirm('Delete this venue?')) {
-                const day = tripDays.find(d => d.dayNumber === dayNumber);
+            const day = tripDays.find(d => d.dayNumber === dayNumber);
+            if (!day) return;
+            const venue = day.venues[venueIndex];
+            undoState = { mode: 'day', dayNumber, venueIndex, venue: { ...venue } };
+            day.venues.splice(venueIndex, 1);
+            displayDaysTimeline();
+            showUndoToast(`Deleted ${venue.name}`);
+        }
+
+        function showUndoToast(message) {
+            const toast = document.getElementById('undo-toast');
+            document.getElementById('undo-toast-message').textContent = message;
+            toast.style.display = 'flex';
+            if (undoTimer) clearTimeout(undoTimer);
+            undoTimer = setTimeout(() => {
+                toast.style.display = 'none';
+                undoState = null;
+            }, 6000);
+        }
+
+        function undoDelete() {
+            if (!undoState) return;
+            if (undoState.mode === 'list') {
+                venues[undoState.category].splice(undoState.venueIndex, 0, undoState.venue);
+                venues[undoState.category].forEach((v, idx) => { v.rank = idx + 1; });
+                displayVenueList();
+            } else {
+                const day = tripDays.find(d => d.dayNumber === undoState.dayNumber);
                 if (day) {
-                    day.venues.splice(venueIndex, 1);
+                    day.venues.splice(undoState.venueIndex, 0, undoState.venue);
                     displayDaysTimeline();
                 }
             }
+            clearTimeout(undoTimer);
+            document.getElementById('undo-toast').style.display = 'none';
+            undoState = null;
+        }
+
+        function editVenueNote(dayNumber, venueIndex) {
+            const day = tripDays.find(d => d.dayNumber === dayNumber);
+            if (!day) return;
+            const venue = day.venues[venueIndex];
+            const newNote = prompt('Note for this venue:', venue.notes || '');
+            if (newNote !== null) {
+                venue.notes = newNote.trim() || null;
+                displayDaysTimeline();
+            }
+        }
+
+        function renderDaySummary(sortedVenues) {
+            if (sortedVenues.length === 0) return '';
+            const totalDuration = sortedVenues.reduce((sum, v) => sum + (v.duration || 0), 0);
+            let totalTravel = 0;
+            sortedVenues.forEach(v => {
+                if (v.travelFromPrevious) {
+                    const mode = v.legTravelMode || 'driving';
+                    totalTravel += v.travelFromPrevious[mode]?.durationMinutes || 0;
+                }
+            });
+            const parts = [
+                `${sortedVenues.length} venue${sortedVenues.length !== 1 ? 's' : ''}`,
+                totalDuration > 0 ? `${formatDuration(totalDuration)} planned` : null,
+                totalTravel > 0 ? `${formatDuration(totalTravel)} travel` : null,
+            ].filter(Boolean);
+            return `<div style="font-size: 12px; color: #9B9B96; margin-bottom: 24px; letter-spacing: 0.3px;">${parts.join(' · ')}</div>`;
         }
 
         function updateDayDropdown() {
@@ -2768,6 +2832,15 @@ ${travelInfo}
         });
 
     </script>
+
+    <div id="undo-toast" style="display: none; position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+    background: #1A1A1A; color: #FFFFFF; padding: 12px 20px; border-radius: 3px;
+    font-size: 13px; z-index: 1000; gap: 16px; align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2); white-space: nowrap;">
+        <span id="undo-toast-message"></span>
+        <button onclick="undoDelete()" style="background: transparent; border: 1px solid rgba(255,255,255,0.4);
+        color: #FFFFFF; padding: 4px 12px; font-size: 12px; width: auto;">Undo</button>
+    </div>
 
     <div id="about-modal" style="display: none; position: fixed; inset: 0; 
     background: rgba(0,0,0,0.4); z-index: 1000; 
