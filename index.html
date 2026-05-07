@@ -924,6 +924,44 @@
                 min-width: 120px;
             }
         }
+
+        #day-nav {
+            position: fixed;
+            left: 16px;
+            top: 120px;
+            z-index: 100;
+            background: #FFFFFF;
+            border: 1px solid #E8E8E5;
+            border-radius: 3px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 6px 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            max-height: calc(100vh - 160px);
+            overflow-y: auto;
+            width: 128px;
+        }
+
+        @media (max-width: 1439px) {
+            #day-nav { display: none; }
+        }
+
+        .day-nav-item {
+            padding: 7px 12px;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .day-nav-item:hover {
+            background: #F5F5F3;
+        }
+
+        .day-nav-item.active {
+            border-left-color: #1A1A1A;
+            background: #F5F5F3;
+        }
     </style>
 </head>
 
@@ -2094,6 +2132,7 @@
                 updateDayDropdown();
             } else {
                 displayVenueList();
+                renderDayNav();
             }
 
             document.getElementById('saved-trips-list').style.display = 'none';
@@ -2117,6 +2156,7 @@
                 document.getElementById('trip-date-range').value = '';
                 tripStartDate = null;
                 tripEndDate = null;
+                renderDayNav();
 
                 if (hotelMarker) {
                     hotelMarker.setMap(null);
@@ -2377,6 +2417,7 @@
 
             listDisplay.innerHTML = html;
             updateVenueMarkers();
+            renderDayNav();
 
             if (hotelData) {
                 fetchWeatherForTrip();
@@ -2391,7 +2432,7 @@
             });
 
             return `
-<div class="day-card">
+<div class="day-card" id="day-card-${day.dayNumber}">
     <div onclick="toggleDayCollapse(${day.dayNumber})" style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px; cursor: pointer; user-select: none;">
         <h3 style="margin: 0;">
             <span id="day-${day.dayNumber}-arrow" style="display: inline-block; width: 20px;">${collapsedDays.has(day.dayNumber) ? '▶' : '▼'}</span>
@@ -2829,9 +2870,67 @@ ${travelInfo}
                 header.classList.remove('shrunk');
                 document.body.style.paddingTop = '0';
             }
+            updateActiveDay();
         });
 
+        function renderDayNav() {
+            const nav = document.getElementById('day-nav');
+            if (tripDays.length === 0) {
+                nav.innerHTML = '';
+                nav.style.opacity = '0';
+                nav.style.pointerEvents = 'none';
+                return;
+            }
+
+            nav.innerHTML = tripDays.map(day => {
+                const [y, m, d] = day.date.split('-').map(Number);
+                const dateObj = new Date(y, m - 1, d);
+                const shortDate = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                return `<div class="day-nav-item" data-day="${day.dayNumber}" onclick="scrollToDay(${day.dayNumber})">
+                    <div style="font-size: 11px; font-weight: 500; letter-spacing: 0.3px; color: #1A1A1A;">Day ${day.dayNumber}</div>
+                    <div style="font-size: 10px; color: #9B9B96; margin-top: 1px;">${shortDate}</div>
+                </div>`;
+            }).join('');
+
+            setupItineraryObserver();
+            updateActiveDay();
+        }
+
+        function scrollToDay(dayNumber) {
+            const card = document.getElementById(`day-card-${dayNumber}`);
+            if (!card) return;
+            const offset = 64;
+            const top = card.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top, behavior: 'smooth' });
+        }
+
+        function updateActiveDay() {
+            const cards = document.querySelectorAll('[id^="day-card-"]');
+            let activeNum = null;
+            cards.forEach(card => {
+                if (card.getBoundingClientRect().top <= 160) {
+                    activeNum = card.id.replace('day-card-', '');
+                }
+            });
+            document.querySelectorAll('.day-nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.day === activeNum);
+            });
+        }
+
+        function setupItineraryObserver() {
+            if (window._itineraryObserver) window._itineraryObserver.disconnect();
+            window._itineraryObserver = new IntersectionObserver(entries => {
+                const nav = document.getElementById('day-nav');
+                const visible = entries[0].isIntersecting;
+                nav.style.opacity = visible ? '1' : '0';
+                nav.style.pointerEvents = visible ? 'auto' : 'none';
+            }, { threshold: 0.05 });
+            window._itineraryObserver.observe(document.getElementById('list-display'));
+        }
+
     </script>
+
+    <div id="day-nav"></div>
 
     <div id="undo-toast" style="display: none; position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
     background: #1A1A1A; color: #FFFFFF; padding: 12px 20px; border-radius: 3px;
